@@ -30,22 +30,33 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Quarkus RESTEasy Reactive para suporte a REST -->
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest</artifactId>
+            <artifactId>quarkus-resteasy-reactive</artifactId>
         </dependency>
+
+        <!-- Quarkus Hibernate ORM para integração com o banco de dados -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-hibernate-orm</artifactId>
         </dependency>
+
+        <!-- Quarkus SmallRye JWT para suporte a JWT -->
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-smallrye-jwt-build</artifactId>
+            <artifactId>quarkus-smallrye-jwt</artifactId>
         </dependency>
+
+        <!-- Quarkus Jackson para processamento de JSON -->
         <dependency>
-            <groupId>org.mindrot</groupId>
-            <artifactId>jbcrypt</artifactId>
-            <version>0.4</version>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jackson</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -57,15 +68,7 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-hibernate-validator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-qute</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-jdbc-postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -73,15 +76,38 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-validator</artifactId>
+        </dependency>
+
+        <!-- Quarkus JDBC PostgreSQL para conexão com o banco de dados PostgreSQL -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jdbc-postgresql</artifactId>
+        </dependency>
+
+        <!-- Biblioteca de hash bcrypt para segurança -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+
+        <!-- Quarkus JUnit5 para testes -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Rest Assured para testes de integração REST -->
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+
 
     <build>
         <plugins>

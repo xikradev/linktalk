@@ -18,6 +18,12 @@ public class UserDAO {
         return query.getResultStream().findFirst().orElse(null);
     }
 
+    public User findById(Long id){
+        TypedQuery<User> query =entityManager.createQuery("SELECT u FROM User u WHERE u.id = :id",User.class);
+        query.setParameter("id", id);
+        return query.getResultStream().findFirst().orElse(null);
+    }
+
     public void persist(User user){
         entityManager.persist(user);
     }

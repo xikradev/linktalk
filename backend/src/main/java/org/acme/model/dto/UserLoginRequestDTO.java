@@ -1,6 +1,6 @@
 package org.acme.model.dto;
 
-public class UserLoginDTO {
+public class UserLoginRequestDTO {
     private String email;
     private String password;
 

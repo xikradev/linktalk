@@ -8,7 +8,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.acme.model.bo.UserBO;
-import org.acme.model.dto.UserLoginDTO;
+import org.acme.model.dto.UserLoginRequestDTO;
+import org.acme.model.dto.UserLoginResponseDTO;
 import org.acme.model.dto.UserRegisterDTO;
 
 @Path("/auth")
@@ -28,8 +29,9 @@ public class AuthController {
 
     @POST
     @Path("/login")
-    public Response login(UserLoginDTO userLoginDTO){
-        String token = userBO.login(userLoginDTO);
-        return Response.ok(token).build();
+    public Response login(UserLoginRequestDTO userLoginRequestDTO){
+        UserLoginResponseDTO response = userBO.login(userLoginRequestDTO);
+
+        return Response.ok(response).build();
     }
 }
