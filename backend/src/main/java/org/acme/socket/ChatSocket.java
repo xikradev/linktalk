@@ -1,127 +1,117 @@
 package org.acme.socket;
 
-import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.ServerWebSocket;
-import io.smallrye.jwt.auth.principal.JWTParser;
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+
+import io.smallrye.common.annotation.Blocking;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Produces;
+import jakarta.websocket.*;
+import jakarta.websocket.server.PathParam;
+import jakarta.websocket.server.ServerEndpoint;
+import jakarta.ws.rs.QueryParam;
 import org.acme.model.bo.ChatBO;
+import org.acme.model.bo.UserBO;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import io.smallrye.jwt.auth.principal.JWTParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-
-@ApplicationScoped
+@ServerEndpoint("/chat/{conversationId}/{token}")
 public class ChatSocket {
 
     @Inject
     ChatBO chatBO;
-
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-    private final Map<Long, Map<String, ServerWebSocket>> activeSessions = new ConcurrentHashMap<>();
-
     @Inject
-    Vertx vertx;
+    UserBO userBO;
+
     @Inject
     JWTParser jwtParser;
 
-    @PostConstruct
-    void setup() {
-        HttpServer server = vertx.createHttpServer();
-        server.webSocketHandler(this::handleWebSocket);
-        server.listen(8080);
-    }
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final Map<Long, Map<Session, Long>> activeSessions = new ConcurrentHashMap<>();
 
-    private void handleWebSocket(ServerWebSocket ws) {
-        String path = ws.path();
-        if (!path.startsWith("/chat/")) {
-            ws.reject(); // Rejeita se a URL não começar com "/chat/"
-            return;
-        }
-
-        String conversationIdStr = path.substring("/chat/".length());
-        Long conversationId;
-        try {
-            conversationId = Long.parseLong(conversationIdStr);
-        } catch (NumberFormatException e) {
-            ws.reject(); // Rejeita se o conversationId não for um número válido
-            return;
-        }
-
+    @OnOpen
+    public void onOpen(Session session, @PathParam("conversationId") Long conversationId, @PathParam("token") String token) {
+        Long userId = getUserIdFromToken(token);
         activeSessions.computeIfAbsent(conversationId, k -> new ConcurrentHashMap<>())
-                .put(ws.textHandlerID(), ws);
-
-        ws.textMessageHandler(message -> {
-            Long senderId = getUserIdFromWebSocket(ws);
-            chatBO.sendMessage(conversationId, senderId, message);
-            broadcastMessage(conversationId, senderId, message);
-        });
-
-        ws.closeHandler(v -> {
-            Map<String, ServerWebSocket> sessions = activeSessions.get(conversationId);
-            if (sessions != null) {
-                sessions.remove(ws.textHandlerID());
-                if (sessions.isEmpty()) {
-                    activeSessions.remove(conversationId);
-                }
-            }
-        });
-
-        ws.exceptionHandler(Throwable::printStackTrace);
+                .put(session, userId);
+        System.out.println("WebSocket opened for conversationId " + conversationId);
     }
 
-    private void broadcastMessage(Long conversationId, Long senderId, String content) {
-        Map<String, ServerWebSocket> sessions = activeSessions.get(conversationId);
+    @OnMessage
+    public void onMessage(String message, Session session, @PathParam("conversationId") Long conversationId) {
+        Long senderId = activeSessions.get(conversationId).get(session);
+
+        CompletableFuture<String> senderEmailFuture = CompletableFuture.supplyAsync(() -> {
+            return userBO.findUserEmailById(senderId);
+        });
+
+        // Aguarda até que o email seja obtido e a mensagem seja salva
+        senderEmailFuture.thenAccept(senderEmail -> {
+            // Envia a mensagem para o chat
+            chatBO.sendMessage(conversationId, senderId, senderEmail, message);
+
+            // Transmite a mensagem para todos os clientes conectados
+            broadcastMessage(conversationId, senderEmail, message);
+        }).exceptionally(ex -> {
+            // Trata qualquer exceção que possa ocorrer durante o processo
+            ex.printStackTrace();
+            return null;
+        });
+    }
+
+    @OnClose
+    public void onClose(Session session, @PathParam("conversationId") Long conversationId) {
+        Map<Session, Long> sessions = activeSessions.get(conversationId);
         if (sessions != null) {
-            String formattedMessage = formatMessage(senderId, content);
-            sessions.values().forEach(session -> session.writeTextMessage(formattedMessage));
+            sessions.remove(session);
+            if (sessions.isEmpty()) {
+                activeSessions.remove(conversationId);
+            }
+        }
+        System.out.println("WebSocket closed for conversationId " + conversationId);
+    }
+
+    @OnError
+    public void onError(Session session, Throwable throwable) {
+        throwable.printStackTrace();
+    }
+
+    private void broadcastMessage(Long conversationId, String senderEmail, String content) {
+        Map<Session, Long> sessions = activeSessions.get(conversationId);
+        if (sessions != null) {
+            String formattedMessage = formatMessage(senderEmail, content);
+            sessions.keySet().forEach(session -> {
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        session.getBasicRemote().sendText(formattedMessage);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            });
         }
     }
-    public String formatMessage(Long senderId, String content) {
+
+    private String formatMessage(String senderEmail, String content) {
         ObjectNode jsonObject = objectMapper.createObjectNode();
-        jsonObject.put("senderId", senderId);
+        jsonObject.put("senderEmail", senderEmail);
         jsonObject.put("content", content);
         return jsonObject.toString();
     }
 
-
-    private Long getUserIdFromWebSocket(ServerWebSocket ws) {
-        String token = extractTokenFromQuery(ws.query());
-        if (token != null) {
-            try {
-                JsonWebToken jwt = jwtParser.parse(token);
-                // Supondo que o ID do usuário esteja em um claim chamado "userId"
-                Optional<Long> userId = jwt.getClaim("userId");
-                return userId.orElseThrow(() -> new RuntimeException("Invalid JWT: missing userId claim"));
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException("Failed to parse JWT", e);
-            }
-        } else {
-            throw new RuntimeException("Missing or invalid token");
+    private Long getUserIdFromToken(String token) {
+        try {
+            JsonWebToken jwt = jwtParser.parse(token);
+            Object userIdClaim = jwt.getClaim("userId");
+            Long userId = Long.parseLong(userIdClaim.toString());
+            return userId;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to parse JWT", e);
         }
-    }
-
-    private String extractTokenFromQuery(String query) {
-        if (query == null || query.isEmpty()) {
-            return null;
-        }
-
-        // Divida os parâmetros de consulta
-        String[] params = query.split("&");
-        for (String param : params) {
-            String[] keyValue = param.split("=");
-            if (keyValue.length == 2 && "token".equals(keyValue[0])) {
-                return keyValue[1];
-            }
-        }
-        return null;
     }
 }

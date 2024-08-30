@@ -8,7 +8,7 @@ import java.util.List;
 public class Conversation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
     @JoinColumn(name= "user1_id", nullable = false)

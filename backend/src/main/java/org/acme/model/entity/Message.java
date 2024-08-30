@@ -6,7 +6,7 @@ import jakarta.ws.rs.Consumes;
 @Entity
 public class Message {
     @Id
-    @GeneratedValue(strategy =  GenerationType.AUTO)
+    @GeneratedValue(strategy =  GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
     @JoinColumn(name = "conversation_id", nullable = false)
@@ -18,6 +18,16 @@ public class Message {
     private String content;
     @Column(nullable = false)
     private Long timestamp;
+    @Column(name = "sender_email")
+    private String senderEmail;
+
+    public String getSenderEmail() {
+        return senderEmail;
+    }
+
+    public void setSenderEmail(String senderEmail) {
+        this.senderEmail = senderEmail;
+    }
 
     public Long getId() {
         return id;

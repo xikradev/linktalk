@@ -1,11 +1,10 @@
-import { useState } from 'react'
-import chatRoom from './component/chatRoom'
+import ChatRoom from './component/chatRoom'
 
 function App() {
 
   return (
     <>
-      <chatRoom/>
+      <ChatRoom />
     </>
   )
 }

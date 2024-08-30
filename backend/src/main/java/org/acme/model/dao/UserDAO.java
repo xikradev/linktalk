@@ -3,6 +3,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import org.acme.model.entity.User;
 
@@ -23,6 +24,19 @@ public class UserDAO {
         query.setParameter("id", id);
         return query.getResultStream().findFirst().orElse(null);
     }
+
+    public String findUserEmailById(Long id) {
+        try {
+            TypedQuery<String> query = entityManager.createQuery(
+                    "SELECT u.email FROM User u WHERE u.id = :id", String.class);
+            query.setParameter("id", id);
+
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
 
     public void persist(User user){
         entityManager.persist(user);

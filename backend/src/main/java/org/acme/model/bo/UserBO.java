@@ -39,6 +39,7 @@ public class UserBO {
        String token =Jwt.issuer("linktalk")
                .subject("linktalk")
                .groups(new HashSet<>(Arrays.asList("admin", "writer")))
+               .claim("userId", user.getId().longValue())
                .expiresAt(System.currentTimeMillis() + 3600)
                .sign();
 
@@ -47,5 +48,9 @@ public class UserBO {
        response.setEmail(user.getEmail());
        response.setToken(token);
        return response;
+   }
+    @Transactional
+   public String findUserEmailById(Long id){
+       return userDAO.findUserEmailById(id);
    }
 }

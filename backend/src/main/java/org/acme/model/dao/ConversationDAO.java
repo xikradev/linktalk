@@ -33,7 +33,7 @@ public class ConversationDAO {
     }
 
     public Conversation findById(Long id){
-        TypedQuery<Conversation> query =em.createQuery("SELECT u FROM User u WHERE u.id = :id",Conversation.class);
+        TypedQuery<Conversation> query =em.createQuery("SELECT c FROM Conversation c WHERE c.id = :id",Conversation.class);
         query.setParameter("id", id);
         return query.getResultStream().findFirst().orElse(null);
     }
