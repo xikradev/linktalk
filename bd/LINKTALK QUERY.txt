@@ -1,0 +1,77 @@
+
+
+-- Table: public.users
+
+-- DROP TABLE IF EXISTS public.users;
+
+CREATE TABLE IF NOT EXISTS public.users
+(
+    id integer NOT NULL DEFAULT nextval('users_id_seq'::regclass),
+    fullname character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    email character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    password character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT users_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.users
+    OWNER to postgres;
+
+
+
+-- Table: public.message
+
+-- DROP TABLE IF EXISTS public.message;
+
+CREATE TABLE IF NOT EXISTS public.message
+(
+    id integer NOT NULL DEFAULT nextval('message_id_seq'::regclass),
+    conversation_id integer NOT NULL,
+    sender_id integer NOT NULL,
+    content text COLLATE pg_catalog."default" NOT NULL,
+    "timestamp" bigint NOT NULL,
+    sender_email character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT message_pkey PRIMARY KEY (id),
+    CONSTRAINT message_conversation_id_fkey FOREIGN KEY (conversation_id)
+        REFERENCES public.conversation (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT message_sender_id_fkey FOREIGN KEY (sender_id)
+        REFERENCES public.users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.message
+    OWNER to postgres;
+
+
+
+
+-- Table: public.conversation
+
+-- DROP TABLE IF EXISTS public.conversation;
+
+CREATE TABLE IF NOT EXISTS public.conversation
+(
+    id integer NOT NULL DEFAULT nextval('conversation_id_seq'::regclass),
+    user1_id integer NOT NULL,
+    user2_id integer NOT NULL,
+    CONSTRAINT conversation_pkey PRIMARY KEY (id),
+    CONSTRAINT conversation_user1_id_fkey FOREIGN KEY (user1_id)
+        REFERENCES public.users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT conversation_user2_id_fkey FOREIGN KEY (user2_id)
+        REFERENCES public.users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.conversation
+    OWNER to postgres;
