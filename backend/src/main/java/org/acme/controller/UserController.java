@@ -15,7 +15,7 @@ import org.acme.model.dto.UserRegisterDTO;
 @Path("/auth")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class AuthController {
+public class UserController {
 
     @Inject
     UserBO userBO;

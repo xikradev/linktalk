@@ -8,8 +8,31 @@ import org.acme.model.entity.User;
 
 public class MessageResponseDTO {
 
-    private Conversation conversation;
-    private User sender;
+    private String senderEmail;
     private String content;
-    private Long timestamp;
+    private String timeSented;
+
+    public String getSenderEmail() {
+        return senderEmail;
+    }
+
+    public void setSenderEmail(String senderEmail) {
+        this.senderEmail = senderEmail;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getTimeSented() {
+        return timeSented;
+    }
+
+    public void setTimeSented(String timeSented) {
+        this.timeSented = timeSented;
+    }
 }

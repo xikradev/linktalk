@@ -29,7 +29,7 @@ public class ChatBO {
         return conversationDAO.createConversation(user1, user2);
     }
     @Transactional
-    public void sendMessage(Long conversationId, Long senderId, String senderEmail,String content){
+    public void sendMessage(Long conversationId, Long senderId, String senderEmail,Long currentTimeMillis,String content){
         Conversation conversation = conversationDAO.findById(conversationId);
         User sender = userDAO.findById(senderId);
 
@@ -38,12 +38,9 @@ public class ChatBO {
         message.setSender(sender);
         message.setSenderEmail(senderEmail);
         message.setContent(content);
-        message.setTimestamp(System.currentTimeMillis());
+        message.setTimestamp(currentTimeMillis);
         messageDAO.saveMessage(message);
     }
 
-    public List<Message> getConversationMessages(Long conversationId) {
-        Conversation conversation = conversationDAO.findById(conversationId);
-        return messageDAO.getMessagesByConversation(conversation);
-    }
+
 }

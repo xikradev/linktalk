@@ -1,12 +1,14 @@
 package org.acme.socket;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.smallrye.common.annotation.Blocking;
 import jakarta.inject.Inject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
@@ -51,11 +53,17 @@ public class ChatSocket {
 
         // Aguarda até que o email seja obtido e a mensagem seja salva
         senderEmailFuture.thenAccept(senderEmail -> {
+            Long currentTimeMillis = System.currentTimeMillis();
+            LocalTime time = Instant.ofEpochMilli(currentTimeMillis)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalTime();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+            String formattedTime = time.format(formatter);
             // Envia a mensagem para o chat
-            chatBO.sendMessage(conversationId, senderId, senderEmail, message);
+            chatBO.sendMessage(conversationId, senderId, senderEmail, currentTimeMillis,message);
 
             // Transmite a mensagem para todos os clientes conectados
-            broadcastMessage(conversationId, senderEmail, message);
+            broadcastMessage(conversationId, senderEmail, formattedTime,message);
         }).exceptionally(ex -> {
             // Trata qualquer exceção que possa ocorrer durante o processo
             ex.printStackTrace();
@@ -80,10 +88,10 @@ public class ChatSocket {
         throwable.printStackTrace();
     }
 
-    private void broadcastMessage(Long conversationId, String senderEmail, String content) {
+    private void broadcastMessage(Long conversationId, String senderEmail, String timeSented,String content) {
         Map<Session, Long> sessions = activeSessions.get(conversationId);
         if (sessions != null) {
-            String formattedMessage = formatMessage(senderEmail, content);
+            String formattedMessage = formatMessage(senderEmail, timeSented,content);
             sessions.keySet().forEach(session -> {
                 CompletableFuture.runAsync(() -> {
                     try {
@@ -96,10 +104,11 @@ public class ChatSocket {
         }
     }
 
-    private String formatMessage(String senderEmail, String content) {
+    private String formatMessage(String senderEmail, String timeSented,String content) {
         ObjectNode jsonObject = objectMapper.createObjectNode();
         jsonObject.put("senderEmail", senderEmail);
         jsonObject.put("content", content);
+        jsonObject.put("timeSented", timeSented);
         return jsonObject.toString();
     }
 

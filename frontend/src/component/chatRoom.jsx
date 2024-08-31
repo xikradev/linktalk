@@ -21,6 +21,19 @@ const ChatRoom = () => {
         };
     }, [socket]);
 
+    useEffect(() => {
+        if (userData.connected) {
+            getMessagesByConversation(1);
+        }
+
+    }, [userData.connected])
+
+    const getMessagesByConversation = async (conversationId) => {
+        const response = await axios.get(`http://localhost:8080/message?conversationId=${conversationId}`)
+        console.log(response.data);
+        setPublicChat([...response.data]);
+    }
+
     const registerUser = async () => {
         try {
             const response = await axios.post("http://localhost:8080/auth/login", {
@@ -99,7 +112,7 @@ const ChatRoom = () => {
                     <div className="chat-box">
                         {publicChat.map((msg, index) => (
                             <div key={index} className={msg.senderEmail === userData.email ? "message-right" : "message-left"}>
-                                {msg.content}
+                                {msg.content + ", " + msg.timeSented}
                             </div>
                         ))}
                     </div>

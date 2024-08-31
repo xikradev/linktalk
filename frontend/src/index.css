@@ -47,6 +47,7 @@ button {
   height: 600px;
   padding: 10px;
   display: flex;
+  overflow-y: auto;
   flex-direction: column;
 }
 
