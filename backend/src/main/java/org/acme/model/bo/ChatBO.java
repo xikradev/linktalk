@@ -23,13 +23,15 @@ public class ChatBO {
     @Inject
     UserDAO userDAO;
 
-    public Conversation startConversation(Long user1Id, Long user2Id){
+    public Conversation startConversation(Long user1Id, Long user2Id) {
         User user1 = userDAO.findById(user1Id);
         User user2 = userDAO.findById(user2Id);
         return conversationDAO.createConversation(user1, user2);
     }
+
     @Transactional
-    public void sendMessage(Long conversationId, Long senderId, String senderEmail,Long currentTimeMillis,String content){
+    public void sendMessage(Long conversationId, Long senderId, String senderEmail, Long currentTimeMillis,
+            String content) {
         Conversation conversation = conversationDAO.findById(conversationId);
         User sender = userDAO.findById(senderId);
 
@@ -41,6 +43,5 @@ public class ChatBO {
         message.setTimestamp(currentTimeMillis);
         messageDAO.saveMessage(message);
     }
-
 
 }

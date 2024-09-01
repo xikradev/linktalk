@@ -1,4 +1,5 @@
 package org.acme.model.dao;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.Entity;
@@ -13,14 +14,14 @@ public class UserDAO {
     @Inject
     EntityManager entityManager;
 
-    public User findByEmail(String email){
-        TypedQuery<User> query =entityManager.createQuery("SELECT u FROM User u WHERE u.email = :email",User.class);
+    public User findByEmail(String email) {
+        TypedQuery<User> query = entityManager.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class);
         query.setParameter("email", email);
         return query.getResultStream().findFirst().orElse(null);
     }
 
-    public User findById(Long id){
-        TypedQuery<User> query =entityManager.createQuery("SELECT u FROM User u WHERE u.id = :id",User.class);
+    public User findById(Long id) {
+        TypedQuery<User> query = entityManager.createQuery("SELECT u FROM User u WHERE u.id = :id", User.class);
         query.setParameter("id", id);
         return query.getResultStream().findFirst().orElse(null);
     }
@@ -37,8 +38,7 @@ public class UserDAO {
         }
     }
 
-
-    public void persist(User user){
+    public void persist(User user) {
         entityManager.persist(user);
     }
 }

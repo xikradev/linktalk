@@ -36,7 +36,8 @@ public class ChatSocket {
     private static final Map<Long, Map<Session, Long>> activeSessions = new ConcurrentHashMap<>();
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("conversationId") Long conversationId, @PathParam("token") String token) {
+    public void onOpen(Session session, @PathParam("conversationId") Long conversationId,
+            @PathParam("token") String token) {
         Long userId = getUserIdFromToken(token);
         activeSessions.computeIfAbsent(conversationId, k -> new ConcurrentHashMap<>())
                 .put(session, userId);
@@ -60,10 +61,10 @@ public class ChatSocket {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
             String formattedTime = time.format(formatter);
             // Envia a mensagem para o chat
-            chatBO.sendMessage(conversationId, senderId, senderEmail, currentTimeMillis,message);
+            chatBO.sendMessage(conversationId, senderId, senderEmail, currentTimeMillis, message);
 
             // Transmite a mensagem para todos os clientes conectados
-            broadcastMessage(conversationId, senderEmail, formattedTime,message);
+            broadcastMessage(conversationId, senderEmail, formattedTime, message);
         }).exceptionally(ex -> {
             // Trata qualquer exceção que possa ocorrer durante o processo
             ex.printStackTrace();
@@ -88,10 +89,10 @@ public class ChatSocket {
         throwable.printStackTrace();
     }
 
-    private void broadcastMessage(Long conversationId, String senderEmail, String timeSented,String content) {
+    private void broadcastMessage(Long conversationId, String senderEmail, String timeSented, String content) {
         Map<Session, Long> sessions = activeSessions.get(conversationId);
         if (sessions != null) {
-            String formattedMessage = formatMessage(senderEmail, timeSented,content);
+            String formattedMessage = formatMessage(senderEmail, timeSented, content);
             sessions.keySet().forEach(session -> {
                 CompletableFuture.runAsync(() -> {
                     try {
@@ -104,7 +105,7 @@ public class ChatSocket {
         }
     }
 
-    private String formatMessage(String senderEmail, String timeSented,String content) {
+    private String formatMessage(String senderEmail, String timeSented, String content) {
         ObjectNode jsonObject = objectMapper.createObjectNode();
         jsonObject.put("senderEmail", senderEmail);
         jsonObject.put("content", content);

@@ -6,7 +6,7 @@ import jakarta.ws.rs.Consumes;
 @Entity
 public class Message {
     @Id
-    @GeneratedValue(strategy =  GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
     @JoinColumn(name = "conversation_id", nullable = false)
