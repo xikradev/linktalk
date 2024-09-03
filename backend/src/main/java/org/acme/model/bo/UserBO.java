@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotAuthorizedException;
 import org.acme.model.dao.UserDAO;
+import org.acme.model.dto.UserContactDTO;
 import org.acme.model.dto.UserLoginRequestDTO;
 import org.acme.model.dto.UserLoginResponseDTO;
 import org.acme.model.dto.UserRegisterDTO;
@@ -13,6 +14,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 @ApplicationScoped
 public class UserBO {
@@ -52,5 +54,9 @@ public class UserBO {
     @Transactional
    public String findUserEmailById(Long id){
        return userDAO.findUserEmailById(id);
+   }
+
+   public List<UserContactDTO> contactsByUserId(Long id){
+        return userDAO.contactsByUserId(id);
    }
 }

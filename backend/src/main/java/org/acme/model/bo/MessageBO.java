@@ -1,4 +1,4 @@
-package org.acme.model;
+package org.acme.model.bo;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

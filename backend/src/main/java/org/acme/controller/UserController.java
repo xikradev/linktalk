@@ -1,10 +1,8 @@
 package org.acme.controller;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.websocket.server.PathParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.acme.model.bo.UserBO;
@@ -12,7 +10,7 @@ import org.acme.model.dto.UserLoginRequestDTO;
 import org.acme.model.dto.UserLoginResponseDTO;
 import org.acme.model.dto.UserRegisterDTO;
 
-@Path("/auth")
+@Path("/user")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class UserController {
@@ -33,5 +31,11 @@ public class UserController {
         UserLoginResponseDTO response = userBO.login(userLoginRequestDTO);
 
         return Response.ok(response).build();
+    }
+
+    @GET
+    @Path("/contactsByUserId/{id}")
+    public Response contactsByUserId(@PathParam("id") Long id){
+        return Response.ok(userBO.contactsByUserId(id)).build();
     }
 }

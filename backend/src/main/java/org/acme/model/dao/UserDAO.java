@@ -5,7 +5,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
+import org.acme.model.dto.UserContactDTO;
 import org.acme.model.entity.User;
+
+import java.util.List;
 
 @ApplicationScoped
 public class UserDAO {
@@ -37,6 +40,22 @@ public class UserDAO {
         }
     }
 
+    public List<UserContactDTO>  contactsByUserId(Long id){
+        String queryStr = "SELECT new org.acme.model.dto.UserContactDTO(u.id, u.fullName, u.email, c.id) " +
+                "FROM Conversation c " +
+                "JOIN User u ON (u.id = c.user1.id OR u.id = c.user2.id) " +
+                "WHERE (c.user1.id = :userId OR c.user2.id = :userId) " +
+                "AND u.id != :userId";
+        try {
+            TypedQuery<UserContactDTO> query = entityManager.createQuery(queryStr, UserContactDTO.class);
+            query.setParameter("userId", id);
+
+            return query.getResultList();
+        }catch (NoResultException e) {
+            return null;
+        }
+
+    }
 
     public void persist(User user){
         entityManager.persist(user);
