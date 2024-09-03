@@ -4,6 +4,7 @@ import axios from 'axios';
 const ChatRoom = () => {
     const [publicChat, setPublicChat] = useState([]);
     const [socket, setSocket] = useState(null);
+    const [tab, setTab] = useState("CHATS");
     const [userData, setUserData] = useState({
         username: '',
         email: '',
@@ -108,24 +109,52 @@ const ChatRoom = () => {
     return (
         <div className='container'>
             {userData.connected ? (
-                <div>
-                    <div className="chat-box">
-                        {publicChat.map((msg, index) => (
-                            <div key={index} className={msg.senderEmail === userData.email ? "message-right" : "message-left"}>
-                                {msg.content + ", " + msg.timeSented}
-                            </div>
+            <div className="chat-box">
+                <div className="member-list">
+                    <ul>
+                        {/* <li onClick={() => setTab("CHATS")} className={`member ${tab === "CHATS" && "active"}`}>Chats</li> */}
+                        {...publicChat.keys().map((name, index)=> {
+                            <li onClick={() => setTab(name)} className={`member ${tab === name && "active"}`} key={index}>
+                                {name}
+                            </li>
+                        })} 
+                    </ul>
+                </div>
+                <div className="chat-content">
+                    <ul className="chat-messages">
+                        {publicChat.map((chat, index) => (
+                            <li className={`message ${chat.senderEmail === userData.email ? "self" : ""}`} key={index}>
+                              {/* Avatar do remetente */}
+                                {chat.senderEmail !== userData.email && (
+                                    <div className="avatar">{chat.senderName}</div>
+                                )}
+
+                              {/* Conteúdo da mensagem */}
+                                 <div className="message-data">
+                                    {chat.content + ", " + chat.timeSented}
+                                </div>
+
+                                {/* Avatar do remetente no caso do próprio usuário */}
+                                {chat.senderEmail === userData.email && (
+                                    <div className="avatar self">{chat.senderName}</div>
+                                )}
+                         </li>
                         ))}
-                    </div>
+                    </ul>
+                </div>                     
+                <div className="send-message">
                     <input
-                        type="text"
-                        placeholder="Type a message..."
-                        value={userData.message}
-                        onChange={handleMessageChange}
+                         type="text"
+                         className="input-message"
+                         placeholder="Type a message..."
+                         value={userData.message}
+                         onChange={handleMessageChange}
                     />
-                    <button type="button" onClick={sendMessage}>
-                        Send
+                    <button type="button" className="send-button" onClick={sendMessage}>
+                             Send
                     </button>
                 </div>
+            </div>
             ) : (
                 <div className='register'>
                     <input
