@@ -92,11 +92,10 @@
             <artifactId>quarkus-undertow-websockets</artifactId>
             <version>2.6.1.Final</version>
         </dependency>
-
-
-
-
-
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-resteasy-reactive</artifactId>
+        </dependency>
         <!-- Quarkus JDBC PostgreSQL para conexão com o banco de dados PostgreSQL -->
         <dependency>
             <groupId>io.quarkus</groupId>

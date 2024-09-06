@@ -1,6 +1,7 @@
 package org.acme.controller;
 
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.websocket.server.PathParam;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -20,7 +21,7 @@ public class UserController {
 
     @POST
     @Path("/register")
-    public Response register(UserRegisterDTO userRegisterDTO){
+    public Response register(@Valid UserRegisterDTO userRegisterDTO){
         userBO.register(userRegisterDTO);
         return Response.ok().build();
     }
