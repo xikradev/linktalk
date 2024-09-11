@@ -30,14 +30,14 @@ const ChatRoom = () => {
     }, [userData.connected])
 
     const getMessagesByConversation = async (conversationId) => {
-        const response = await axios.get(`http://localhost:8080/message?conversationId=${conversationId}`)
+        const response = await axios.get(`http://localhost:8081/message?conversationId=${conversationId}`)
         console.log(response.data);
         setPublicChat([...response.data]);
     }
 
     const registerUser = async () => {
         try {
-            const response = await axios.post("http://localhost:8080/user/login", {
+            const response = await axios.post("http://localhost:8081/user/login", {
                 email: userData.email,
                 password: userData.password
             });
@@ -53,7 +53,7 @@ const ChatRoom = () => {
             console.log("Login response:", response.data);
 
             // Configura o WebSocket
-            const ws = new WebSocket(`ws://localhost:8080/chat/${conversationId}/${token}`);
+            const ws = new WebSocket(`ws://localhost:8081/chat/${conversationId}/${token}`);
             ws.onopen = () => {
                 setUserData((prevState) => ({
                     ...prevState,
@@ -109,52 +109,52 @@ const ChatRoom = () => {
     return (
         <div className='container'>
             {userData.connected ? (
-            <div className="chat-box">
-                <div className="member-list">
-                    <ul>
-                        {/* <li onClick={() => setTab("CHATS")} className={`member ${tab === "CHATS" && "active"}`}>Chats</li> */}
-                        {...publicChat.keys().map((name, index)=> {
-                            <li onClick={() => setTab(name)} className={`member ${tab === name && "active"}`} key={index}>
-                                {name}
-                            </li>
-                        })} 
-                    </ul>
-                </div>
-                <div className="chat-content">
-                    <ul className="chat-messages">
-                        {publicChat.map((chat, index) => (
-                            <li className={`message ${chat.senderEmail === userData.email ? "self" : ""}`} key={index}>
-                              {/* Avatar do remetente */}
-                                {chat.senderEmail !== userData.email && (
-                                    <div className="avatar">{chat.senderName}</div>
-                                )}
+                <div className="chat-box">
+                    <div className="member-list">
+                        <ul>
+                            {/* <li onClick={() => setTab("CHATS")} className={`member ${tab === "CHATS" && "active"}`}>Chats</li> */}
+                            {...publicChat.keys().map((name, index) => {
+                                <li onClick={() => setTab(name)} className={`member ${tab === name && "active"}`} key={index}>
+                                    {name}
+                                </li>
+                            })}
+                        </ul>
+                    </div>
+                    <div className="chat-content">
+                        <ul className="chat-messages">
+                            {publicChat.map((chat, index) => (
+                                <li className={`message ${chat.senderEmail === userData.email ? "self" : ""}`} key={index}>
+                                    {/* Avatar do remetente */}
+                                    {chat.senderEmail !== userData.email && (
+                                        <div className="avatar">{chat.senderName}</div>
+                                    )}
 
-                              {/* Conteúdo da mensagem */}
-                                 <div className="message-data">
-                                    {chat.content + ", " + chat.timeSented}
-                                </div>
+                                    {/* Conteúdo da mensagem */}
+                                    <div className="message-data">
+                                        {chat.content + ", " + chat.timeSented}
+                                    </div>
 
-                                {/* Avatar do remetente no caso do próprio usuário */}
-                                {chat.senderEmail === userData.email && (
-                                    <div className="avatar self">{chat.senderName}</div>
-                                )}
-                         </li>
-                        ))}
-                    </ul>
-                </div>                     
-                <div className="send-message">
-                    <input
-                         type="text"
-                         className="input-message"
-                         placeholder="Type a message..."
-                         value={userData.message}
-                         onChange={handleMessageChange}
-                    />
-                    <button type="button" className="send-button" onClick={sendMessage}>
-                             Send
-                    </button>
+                                    {/* Avatar do remetente no caso do próprio usuário */}
+                                    {chat.senderEmail === userData.email && (
+                                        <div className="avatar self">{chat.senderName}</div>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="send-message">
+                        <input
+                            type="text"
+                            className="input-message"
+                            placeholder="Type a message..."
+                            value={userData.message}
+                            onChange={handleMessageChange}
+                        />
+                        <button type="button" className="send-button" onClick={sendMessage}>
+                            Send
+                        </button>
+                    </div>
                 </div>
-            </div>
             ) : (
                 <div className='register'>
                     <input

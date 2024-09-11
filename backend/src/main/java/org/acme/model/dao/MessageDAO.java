@@ -24,4 +24,16 @@ public class MessageDAO {
                 .setParameter("conversation", conversation)
                 .getResultList();
     }
+
+    public Message findById(Long id) {
+        return em.find(Message.class, id);
+    }
+
+    public void delete(Message message) {
+        em.remove(em.contains(message) ? message : em.merge(message));
+    }
+
+    public void update(Message message) {
+        em.merge(message); 
+    }
 }

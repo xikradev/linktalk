@@ -8,9 +8,18 @@ import org.acme.model.entity.User;
 
 public class MessageResponseDTO {
 
+    private Long id;
     private String senderEmail;
     private String content;
     private String timeSented;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getSenderEmail() {
         return senderEmail;
