@@ -78,10 +78,10 @@ const ChatRoom = () => {
                                     <div className="avatar">{chat.senderName}</div>
                                 )}
 
-                              {/* Conteúdo da mensagem */}
-                                 <div className="message-data">
-                                    {chat.content + ", " + chat.timeSented}
-                                </div>
+                                    {/* Conteúdo da mensagem */}
+                                    <div className="message-data">
+                                        {chat.content + ", " + chat.timeSented}
+                                    </div>
 
                                 {/* Avatar do remetente no caso do próprio usuário */}
                                 {chat.senderEmail === userData.email && (

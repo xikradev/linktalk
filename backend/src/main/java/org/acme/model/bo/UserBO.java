@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotAuthorizedException;
+import org.acme.exception.InvalidLoginException;
 import org.acme.model.dao.UserDAO;
 import org.acme.model.dto.UserContactDTO;
 import org.acme.model.dto.UserLoginRequestDTO;
@@ -34,7 +35,7 @@ public class UserBO {
    public UserLoginResponseDTO login(UserLoginRequestDTO userLoginRequestDTO){
        User user = userDAO.findByEmail(userLoginRequestDTO.getEmail());
        if(user == null || !BCrypt.checkpw(userLoginRequestDTO.getPassword(),user.getPassword())){
-           throw new NotAuthorizedException("email ou senha inválidos");
+           throw new InvalidLoginException("email ou senha inválidos");
        }
 
 
