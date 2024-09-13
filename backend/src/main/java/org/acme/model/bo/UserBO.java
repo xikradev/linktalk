@@ -1,4 +1,5 @@
 package org.acme.model.bo;
+
 import io.smallrye.jwt.build.Jwt;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -20,44 +21,45 @@ import java.util.List;
 @ApplicationScoped
 public class UserBO {
 
-   @Inject
+    @Inject
     UserDAO userDAO;
 
-   @Transactional
-    public void register (UserRegisterDTO userRegisterDTO){
-       User user = new User();
-       user.setFullName(userRegisterDTO.getFullName());
-       user.setEmail(userRegisterDTO.getEmail());
-       user.setPassword(BCrypt.hashpw(userRegisterDTO.getPassword(), BCrypt.gensalt()));
-       userDAO.persist(user);
-   }
-
-   public UserLoginResponseDTO login(UserLoginRequestDTO userLoginRequestDTO){
-       User user = userDAO.findByEmail(userLoginRequestDTO.getEmail());
-       if(user == null || !BCrypt.checkpw(userLoginRequestDTO.getPassword(),user.getPassword())){
-           throw new InvalidLoginException("email ou senha inválidos");
-       }
-
-
-       String token =Jwt.issuer("linktalk")
-               .subject("linktalk")
-               .groups(new HashSet<>(Arrays.asList("admin", "writer")))
-               .claim("userId", user.getId().longValue())
-               .expiresAt(System.currentTimeMillis() + 3600)
-               .sign();
-
-       UserLoginResponseDTO response = new UserLoginResponseDTO();
-       response.setFullName(user.getFullName());
-       response.setEmail(user.getEmail());
-       response.setToken(token);
-       return response;
-   }
     @Transactional
-   public String findUserEmailById(Long id){
-       return userDAO.findUserEmailById(id);
-   }
+    public void register(UserRegisterDTO userRegisterDTO) {
+        User user = new User();
+        user.setFullName(userRegisterDTO.getFullName());
+        user.setEmail(userRegisterDTO.getEmail());
+        user.setPassword(BCrypt.hashpw(userRegisterDTO.getPassword(), BCrypt.gensalt()));
+        userDAO.persist(user);
+    }
 
-   public List<UserContactDTO> contactsByUserId(Long id){
+    public UserLoginResponseDTO login(UserLoginRequestDTO userLoginRequestDTO) {
+        User user = userDAO.findByEmail(userLoginRequestDTO.getEmail());
+        if (user == null || !BCrypt.checkpw(userLoginRequestDTO.getPassword(), user.getPassword())) {
+            throw new InvalidLoginException("email ou senha inválidos");
+        }
+
+        String token = Jwt.issuer("linktalk")
+                .subject("linktalk")
+                .groups(new HashSet<>(Arrays.asList("admin", "writer")))
+                .claim("userId", user.getId().longValue())
+                .expiresAt(System.currentTimeMillis() + 3600)
+                .sign();
+
+        UserLoginResponseDTO response = new UserLoginResponseDTO();
+        response.setFullName(user.getFullName());
+        response.setEmail(user.getEmail());
+        response.setToken(token);
+        response.setId(user.getId());
+        return response;
+    }
+
+    @Transactional
+    public String findUserEmailById(Long id) {
+        return userDAO.findUserEmailById(id);
+    }
+
+    public List<UserContactDTO> contactsByUserId(Long id) {
         return userDAO.contactsByUserId(id);
-   }
+    }
 }

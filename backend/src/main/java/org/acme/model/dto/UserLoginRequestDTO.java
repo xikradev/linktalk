@@ -3,6 +3,11 @@ package org.acme.model.dto;
 public class UserLoginRequestDTO {
     private String email;
     private String password;
+    private Long id;
+
+    public Long getId() {
+        return id;
+    }
 
     public String getEmail() {
         return email;
