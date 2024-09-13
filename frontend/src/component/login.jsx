@@ -74,7 +74,9 @@ const login = () => {
             setSocket(ws);
             const data = response.data;
             console.log(data);
-            navigate('/chatRoom', { state: {data } });
+            setTimeout(() => {
+                navigate('/chatRoom', {state: { userDataLogin: data }  });                
+            }, 150);
         } catch (error) {
             setErrorMessage(true);
             console.error("Login failed:", error);

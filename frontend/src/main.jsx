@@ -12,7 +12,7 @@ import { BrowserRouter } from 'react-router-dom';
 // )
 ReactDOM.render(
   <BrowserRouter>
-    <App /> {/* Envolva o App com o BrowserRouter */}
+    <App /> 
   </BrowserRouter>,
   document.getElementById('root')
 );

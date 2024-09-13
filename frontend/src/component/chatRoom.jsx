@@ -3,6 +3,7 @@ import {useLocation} from 'react-router-dom';
 import axios from 'axios';
 import sendIcon from '/VisualStudio/linktalk/frontend/src/assets/send-message.png';
 import newChatIcon from '/VisualStudio/linktalk/frontend/src/assets/chat.png';
+import serchIcon from '/VisualStudio/linktalk/frontend/src/assets/lupa.png';
 
 
 const ChatRoom = () => {
@@ -11,6 +12,9 @@ const ChatRoom = () => {
     const [publicChat, setPublicChat] = useState([]);
     const [socket, setSocket] = useState(null);
     const [tab, setTab] = useState("CHATS");
+    // modal de pesquisa de usuário
+    const [isModalOpen, setModalOpen] = useState(false);
+    const [email, setEmail] = useState("");
     const [userData, setUserData] = useState({
         username: '',
         email: '',
@@ -62,6 +66,20 @@ const ChatRoom = () => {
         }));
     };
 
+    const searchUser = () => {
+        console.log(`Buscando usuário com o email: ${email}`);
+        // Aqui você pode adicionar a lógica para procurar o usuário pelo e-mail
+        closeModal(); // Fecha o modal após a pesquisa
+    };    
+
+    const startConversation = async (user2Id) => {
+        const result = await axios.post(`http://localhost:8081/conversation?user1Id=${userDataLogin.id}&user2Id=${user2Id}`);
+    }
+
+    const getConversations = async () => {
+        const result = await axios.get(`http://localhost:8081/user/contactsByUserId?userId=${userDataLogin.id}`);
+    }
+
     useEffect(() => {
         console.log(publicChat)
     }, [publicChat])
@@ -75,10 +93,11 @@ const ChatRoom = () => {
                     <label>Conversas</label>
                     <button 
                         className="send-button" 
-                        onClick={alert("teste")}
+                        onClick={() => setModalOpen(true)}
                         style={{ marginLeft: '60%'}}
                     > 
-                        <img src={newChatIcon} alt='newChatIcon' style={{"textAlign": "center", width: "20px"}}/> </button>
+                        <img src={newChatIcon} alt='newChatIcon' style={{"textAlign": "center", width: "20px"}}/>
+                    </button>
                     <hr />
                     <ul>
                         {/* <li onClick={() => setTab("CHATS")} className={`member ${tab === "CHATS" && "active"}`}>Chats</li> */}
@@ -111,19 +130,62 @@ const ChatRoom = () => {
                         ))}
                     </ul>
                     <div className="send-message" >
-                    <input
-                         type="text"
-                         className="input-message"
-                         placeholder="Digite uma mensagem..."
-                         value={userData.message}
-                         onChange={handleMessageChange}
-                    />
-                    <button className="send-button" onClick={sendMessage}>
-                        <img src={sendIcon} alt='sendIcon' style={{"textAlign": "center"}}/>
-                    </button>
-                </div>
-                </div>                     
+                        <input
+                            type="text"
+                            className="input-message"
+                            placeholder="Digite uma mensagem..."
+                            value={userData.message}
+                            onChange={handleMessageChange}
+                        />
+                        <button className="send-button" onClick={sendMessage}>
+                            <img src={sendIcon} alt='sendIcon' style={{"textAlign": "center"}}/>
+                        </button>
+                    </div>
+                </div>    
 
+                 {/* Modal de Pesquisa de Usuário */}         
+                {isModalOpen && (
+                    <div className="modal">
+                        <div className="modal-content">
+                            <h3>Buscar Usuário</h3>
+                            <hr/>
+                            <input 
+                            type="email" 
+                            className="input-message"
+                            style={{ marginLeft: '0px', width: '80%'}}
+                            placeholder="Digite o email do usuário"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            />
+                            <button className="send-button" onClick={() => searchUser}>
+                                <img src={serchIcon} alt='serchIcon' style={{"textAlign": "center"}}/>
+                            </button>
+                            <div className="modal-buttons">
+                                {/* Botão de Cancelar */}
+                                <button 
+                                    onClick={() =>{ 
+                                        setModalOpen(false);
+                                        //closeModal
+                                    }} 
+                                    style={{ padding: '10px 20px', marginRight: '10px', backgroundColor: 'red', color: '#fff', border: 'none', borderRadius: '5px' }}
+                                >
+                                    Cancelar
+                                </button>
+
+                                {/* Botão de Adicionar */}
+                                <button 
+                                    onClick={() => {
+                                        //addUser
+                                        setModalOpen(false);
+                                    }} 
+                                    style={{ padding: '10px 20px', backgroundColor: 'green', color: '#fff', border: 'none', borderRadius: '5px' }}
+                                >
+                                    Adicionar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             {/* </div> */}
         </div>
     </>

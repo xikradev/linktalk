@@ -7,6 +7,7 @@ function App() {
   return (
     <>
      <Routes>
+      <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
       <Route path="/cadastro" element={<Cadastro />} />
       <Route path="/chatRoom" element={<ChatRoom />} />
