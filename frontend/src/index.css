@@ -28,7 +28,9 @@ button {
 
 
 .container {
-  position: relative;
+  /* position: relative; */
+  display: flex;
+  height: 100vh; 
 }
 
 /*CSS da tela de login*/
@@ -107,30 +109,58 @@ button {
 }
 
 .member-list {
-  width: 20%;
+  width: 20%; /* Define a largura da lista de contatos */
+  background-color: #f0f0f0; /* Cor de fundo */
+  padding: 10px;
+  border-right: 1px solid #ddd;
+  overflow-y: auto; 
+  height: 100vh;
 }
 
 .chat-content {
   width: 80%;
-  margin-left: 10px;
+  display: flex;
+  height: 100vh;
+  /* flex: 1; */
+    flex-direction: column;
+    justify-content: space-between; /* Mantém o input sempre na parte inferior */
+    padding: 10px;
+    border-left: 1px solid #ddd;
+    position: relative;
+
 }
 
 .chat-messages {
-  height: 80%;
-  border: 1px solid #000;
+  /* height: 80%; */
+  border: 1px solid #acacac;
+  flex-grow: 1;
+    overflow-y: auto; /* Adiciona rolagem para as mensagens */
+    padding: 10px;
+    /* border: 1px solid #ccc; */
+    margin-bottom: 10px;
+    background-color: #fff;
 }
 
 .send-message {
-  width: 100%;
   display: flex;
   flex-direction: row;
-  margin-top: 37%;
+  margin-bottom: 10px;
   position: relative;
+
+    align-items: center;
+    background-color: #f9f9f9;
+    border-radius: 20px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
 }
 
 .input-message {
-  width: 90%;
   border-radius: 50px;
+  flex: 1;
+    border: none;
+    outline: none;
+    padding: 10px;
+    background-color: #f0f0f0;
 }
 
 ul {
@@ -139,11 +169,16 @@ ul {
 }
 
 .send-button {
-  width: 8%;
-  border-radius: 50px;
-  margin-left: 5px;
-  background-color: rgb(65, 2, 125);
-  cursor: pointer;
+  /* width: 8%; */
+  /* border-radius: 50px; */
+  margin-left: 10px;
+  /* background-color: rgb(65, 2, 125); */
+  /* cursor: pointer; */
+
+  background-color: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
 }
 
 .member {
@@ -170,6 +205,16 @@ ul {
   padding: 3px 5px;
   border-radius: 5px;
   color: #fff;
+  width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    margin-right: 10px;
 }
 
 .avatar.self {

@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
+import {useLocation} from 'react-router-dom';
 import axios from 'axios';
-import sendIcon from '/VisualStudio/linktalk/frontend/src/assets/send-message.png'
+import sendIcon from '/VisualStudio/linktalk/frontend/src/assets/send-message.png';
+import newChatIcon from '/VisualStudio/linktalk/frontend/src/assets/chat.png';
+
+
 const ChatRoom = () => {
+    const location = useLocation(); // Access location object
+    const { userDataLogin } = location.state || {}; // Get userData from state 
     const [publicChat, setPublicChat] = useState([]);
     const [socket, setSocket] = useState(null);
     const [tab, setTab] = useState("CHATS");
@@ -29,6 +35,10 @@ const ChatRoom = () => {
 
     }, [userData.connected])
 
+    useEffect(() => {
+        console.log("User data in ChatRoom:", userDataLogin); 
+      }, [userDataLogin]); 
+
     const getMessagesByConversation = async (conversationId) => {
         const response = await axios.get(`http://localhost:8081/message?conversationId=${conversationId}`)
         console.log(response.data);
@@ -37,6 +47,7 @@ const ChatRoom = () => {
 
 
     const sendMessage = () => {
+        console.log(userData);
         if (socket && userData.message.trim()) {
             console.log(userData.message)
             socket.send(userData.message);
@@ -57,9 +68,18 @@ const ChatRoom = () => {
 
     return (
     <>
+    {console.log(userDataLogin)}
         <div className='container'>
-            <div className="chat-box">
+            {/* <div className="chat-box"> */}
                 <div className="member-list">
+                    <label>Conversas</label>
+                    <button 
+                        className="send-button" 
+                        onClick={alert("teste")}
+                        style={{ marginLeft: '60%'}}
+                    > 
+                        <img src={newChatIcon} alt='newChatIcon' style={{"textAlign": "center", width: "20px"}}/> </button>
+                    <hr />
                     <ul>
                         {/* <li onClick={() => setTab("CHATS")} className={`member ${tab === "CHATS" && "active"}`}>Chats</li> */}
                         {...publicChat.keys().map((name, index)=> {
@@ -90,8 +110,7 @@ const ChatRoom = () => {
                          </li>
                         ))}
                     </ul>
-                </div>                     
-                <div className="send-message">
+                    <div className="send-message" >
                     <input
                          type="text"
                          className="input-message"
@@ -103,7 +122,9 @@ const ChatRoom = () => {
                         <img src={sendIcon} alt='sendIcon' style={{"textAlign": "center"}}/>
                     </button>
                 </div>
-            </div>
+                </div>                     
+
+            {/* </div> */}
         </div>
     </>
     );

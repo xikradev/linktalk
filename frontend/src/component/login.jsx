@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import {Link, Navigate} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import logoLK from '/VisualStudio/linktalk/frontend/src/assets/linktalk.png';
 import ChatRoom from './chatRoom';
 
 const login = () => {
+    const navigate = useNavigate();
     const [publicChat, setPublicChat] = useState([]);
     const [socket, setSocket] = useState(null);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [erroMessage, setErrorMessage] = useState(false);
     const [userData, setUserData] = useState({
         username: '',
@@ -72,7 +72,9 @@ const login = () => {
             };
 
             setSocket(ws);
-            setIsLoggedIn(true);
+            const data = response.data;
+            console.log(data);
+            navigate('/chatRoom', { state: {data } });
         } catch (error) {
             setErrorMessage(true);
             console.error("Login failed:", error);
@@ -122,7 +124,8 @@ const login = () => {
                 </Link>
             </form>
         </div>
-    {isLoggedIn && <Navigate to="/chatRoom" replace={true}/>}
+    {/* {isLoggedIn && <Navigate to="/chatRoom" replace={true}/>} */}
+    {/* {isLoggedIn && <ChatRoom userData={userData}/>} */}
     </div>
 );
 }
