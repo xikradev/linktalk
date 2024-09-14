@@ -6,6 +6,8 @@ import logoLK from '/img/linktalk.png';
 import ChatRoom from './chatRoom';
 import VisibleIcon from '/img/olho.png';
 import NoVisibleIcon from '/img/naoVisivel.png';
+import { set_socket } from '../redux/socketActions';
+import { useDispatch } from 'react-redux';
 
 const login = () => {
     const navigate = useNavigate();

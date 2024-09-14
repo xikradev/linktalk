@@ -83,12 +83,6 @@ public class MessageBO {
         message.setContent(content);
         message.setTimestamp(currentTimeMillis);
         messageDAO.saveMessage(message);
-
-        AuditLog log = new AuditLog("sendMessage", sender.getFullName(), LocalDateTime.now());
-        auditLogDAO.save(log);
-
-        LOGGER.info("User: {}, Action: {}, Timestamp: {}", sender.getFullName(), "sendMessage", LocalDateTime.now());
-
         return message;
     }
 

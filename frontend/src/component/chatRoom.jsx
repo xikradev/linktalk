@@ -6,6 +6,7 @@ import newChatIcon from '/img/chat.png';
 import serchIcon from '/img/lupa.png';
 import userIcon from '/img/user.png';
 import logoutIcon from '/img/logout.png';
+import store from '../redux/store';
 
 const ChatRoom = () => {
     const navigate = useNavigate();
@@ -29,7 +30,7 @@ const ChatRoom = () => {
     });
 
     useEffect(() => {
-        console.log(store.getState().socket.socket.send)
+        console.log(store.getState().socket.socket)
     }, [])
 
     useEffect(() => {
@@ -62,14 +63,14 @@ const ChatRoom = () => {
 
     const sendMessage = () => {
         console.log(userData);
-        if (socket && userData.message.trim()) {
+        if (store.getState().socket.socket && userData.message.trim()) {
             const newMessage = {
                 senderEmail: userData.email,
                 senderName: userDataLogin.fullName,
                 content: userData.message,
                 timeSented: new Date().toLocaleTimeString(),
             };
-            socket.send(JSON.stringify(newMessage));
+            store.getState().socket.socket.send(JSON.stringify(newMessage));
             setPublicChat(prevChat => [...prevChat, newMessage]);
 
             setUserData(prevState => ({ ...prevState, message: '' }));
