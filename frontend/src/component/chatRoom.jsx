@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import {useLocation} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import sendIcon from '/VisualStudio/linktalk/frontend/src/assets/send-message.png';
 import newChatIcon from '/VisualStudio/linktalk/frontend/src/assets/chat.png';
 import serchIcon from '/VisualStudio/linktalk/frontend/src/assets/lupa.png';
 import userIcon from '/VisualStudio/linktalk/frontend/src/assets/user.png';
+import logoutIcon from '/VisualStudio/linktalk/frontend/src/assets/logout.png';
 
 const ChatRoom = () => {
+    const navigate = useNavigate();
     const location = useLocation(); // Access location object
     const { userDataLogin } = location.state || {}; // Get userData from state 
     const [publicChat, setPublicChat] = useState([]);
@@ -85,6 +87,8 @@ const ChatRoom = () => {
     //Adicionar novo contato e iniciar conversa
     const startConversation = async (user2Id) => {
         const result = await axios.post(`http://localhost:8081/conversation?user1Id=${userDataLogin.id}&user2Id=${user2Id}`);
+        console.log(result.data);
+        getConversations();
     }
 
     const getConversations = async () => {
@@ -103,6 +107,7 @@ const ChatRoom = () => {
         <div className='container'>
             {/* <div className="chat-box"> */}
                 <div className="member-list">
+                    <div style={{"display": "flex", "alignItems": "center"}}>
                     <label>Conversas</label>
                     {/*Abrir a modal para adicionar um novo usuário a lista de contatos*/}
                     <button 
@@ -112,6 +117,7 @@ const ChatRoom = () => {
                     > 
                         <img src={newChatIcon} alt='newChatIcon' style={{"textAlign": "center", width: "20px"}}/>
                     </button>
+                    </div>
                     <hr />
                     <div className='contact-list'>
                          <ul>
@@ -133,7 +139,16 @@ const ChatRoom = () => {
                     </div>
                     <div className='user'>
                         <hr/>
+                        <div style={{"display": "flex"}}>
                         <p>Olá, {userDataLogin ? userDataLogin.fullName : ''}</p>
+                        <button className="send-button" onClick={() => {
+                            setTimeout(() => {
+                                navigate('/');                
+                            }, 150);
+                        }} >
+                            <img src={logoutIcon} placeholder='Sair' alt='logoutIcon' style={{"textAlign": "center"}}/>
+                        </button>
+                        </div>
                     </div>
                 </div>
                 <div className="chat-content">
@@ -185,11 +200,15 @@ const ChatRoom = () => {
                             style={{ marginLeft: '0px', width: '80%'}}
                             placeholder="Digite o email do usuário"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => {
+                                const filteredEmail = e.target.value.toLowerCase(); 
+                                setEmail(filteredEmail);
+                              }}
                             />
                             <button className="send-button" onClick={() => searchUser}>
                                 <img src={serchIcon} alt='serchIcon' style={{"textAlign": "center"}}/>
                             </button>
+                            
                             <div className="modal-buttons">
                                 {/* Botão de Cancelar */}
                                 <button 
@@ -206,6 +225,7 @@ const ChatRoom = () => {
                                 <button 
                                     onClick={() => {
                                         //addUser
+                                        startConversation(userDataLogin.conversationId);
                                         setModalOpen(false);
                                     }} 
                                     style={{ padding: '10px 20px', backgroundColor: 'green', color: '#fff', border: 'none', borderRadius: '5px' }}
