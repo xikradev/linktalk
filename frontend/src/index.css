@@ -143,6 +143,24 @@ button {
   border-right: 1px solid #ddd;
   overflow-y: auto; 
   height: 100vh;
+  flex-direction: column;
+  height: 100%; 
+}
+
+.contact-list-wrapper { 
+  flex-grow: 1; 
+  overflow-y: auto; 
+  justify-content: space-between;
+  height: 70%;
+}
+
+.user{
+  flex-direction: row;
+  position:static ;
+  padding: 5px 10px;
+  position: sticky;
+  bottom: 0;
+  margin-top: 180%;
 }
 
 .chat-content {
@@ -227,6 +245,8 @@ ul {
   background: grey;
   color: #fff;
 }
+
+
 
 .avatar {
   background-color: cornflowerblue;
