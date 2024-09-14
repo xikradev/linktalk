@@ -6,6 +6,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
+import org.acme.audit.Auditable;
 import org.acme.model.bo.ConversationBO;
 import org.acme.model.entity.Conversation;
 

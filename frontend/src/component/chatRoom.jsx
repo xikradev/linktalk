@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import {useLocation} from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import sendIcon from '/VisualStudio/linktalk/frontend/src/assets/send-message.png';
-import newChatIcon from '/VisualStudio/linktalk/frontend/src/assets/chat.png';
-import serchIcon from '/VisualStudio/linktalk/frontend/src/assets/lupa.png';
+import sendIcon from '/img/send-message.png';
+import newChatIcon from '/img/chat.png';
+import serchIcon from '/img/lupa.png';
+import store from '../redux/store';
 
 
 const ChatRoom = () => {
@@ -24,6 +25,10 @@ const ChatRoom = () => {
     });
 
     useEffect(() => {
+        console.log(store.getState().socket.socket.send)
+    }, [])
+
+    useEffect(() => {
         // Limpar a conexão WebSocket quando o componente desmontar
         return () => {
             if (socket) {
@@ -40,8 +45,8 @@ const ChatRoom = () => {
     }, [userData.connected])
 
     useEffect(() => {
-        console.log("User data in ChatRoom:", userDataLogin); 
-      }, [userDataLogin]); 
+        console.log("User data in ChatRoom:", userDataLogin);
+    }, [userDataLogin]);
 
     const getMessagesByConversation = async (conversationId) => {
         const response = await axios.get(`http://localhost:8081/message?conversationId=${conversationId}`)
@@ -52,9 +57,9 @@ const ChatRoom = () => {
 
     const sendMessage = () => {
         console.log(userData);
-        if (socket && userData.message.trim()) {
+        if (store.getState().socket.socket && userData.message.trim()) {
             console.log(userData.message)
-            socket.send(userData.message);
+            store.getState().socket.socket.send(userData.message);
             setUserData((prevState) => ({ ...prevState, message: '' }));
         }
     };
@@ -70,7 +75,7 @@ const ChatRoom = () => {
         console.log(`Buscando usuário com o email: ${email}`);
         // Aqui você pode adicionar a lógica para procurar o usuário pelo e-mail
         closeModal(); // Fecha o modal após a pesquisa
-    };    
+    };
 
     const startConversation = async (user2Id) => {
         const result = await axios.post(`http://localhost:8081/conversation?user1Id=${userDataLogin.id}&user2Id=${user2Id}`);
@@ -85,48 +90,48 @@ const ChatRoom = () => {
     }, [publicChat])
 
     return (
-    <>
-    {console.log(userDataLogin)}
-        <div className='container'>
-            {/* <div className="chat-box"> */}
+        <>
+            {console.log(userDataLogin)}
+            <div className='container'>
+                {/* <div className="chat-box"> */}
                 <div className="member-list">
                     <label>Conversas</label>
-                    <button 
-                        className="send-button" 
+                    <button
+                        className="send-button"
                         onClick={() => setModalOpen(true)}
-                        style={{ marginLeft: '60%'}}
-                    > 
-                        <img src={newChatIcon} alt='newChatIcon' style={{"textAlign": "center", width: "20px"}}/>
+                        style={{ marginLeft: '60%' }}
+                    >
+                        <img src={newChatIcon} alt='newChatIcon' style={{ "textAlign": "center", width: "20px" }} />
                     </button>
                     <hr />
                     <ul>
                         {/* <li onClick={() => setTab("CHATS")} className={`member ${tab === "CHATS" && "active"}`}>Chats</li> */}
-                        {...publicChat.keys().map((name, index)=> {
+                        {...publicChat.keys().map((name, index) => {
                             <li onClick={() => setTab(name)} className={`member ${tab === name && "active"}`} key={index}>
                                 {name}
                             </li>
-                        })} 
+                        })}
                     </ul>
                 </div>
                 <div className="chat-content">
                     <ul className="chat-messages">
                         {publicChat.map((chat, index) => (
                             <li className={`message ${chat.senderEmail === userData.email ? "self" : ""}`} key={index}>
-                              {/* Avatar do remetente */}
+                                {/* Avatar do remetente */}
                                 {chat.senderEmail !== userData.email && (
                                     <div className="avatar">{chat.senderName}</div>
                                 )}
 
-                                    {/* Conteúdo da mensagem */}
-                                    <div className="message-data">
-                                        {chat.content + ", " + chat.timeSented}
-                                    </div>
+                                {/* Conteúdo da mensagem */}
+                                <div className="message-data">
+                                    {chat.content + ", " + chat.timeSented}
+                                </div>
 
                                 {/* Avatar do remetente no caso do próprio usuário */}
                                 {chat.senderEmail === userData.email && (
                                     <div className="avatar self">{chat.senderName}</div>
                                 )}
-                         </li>
+                            </li>
                         ))}
                     </ul>
                     <div className="send-message" >
@@ -138,46 +143,46 @@ const ChatRoom = () => {
                             onChange={handleMessageChange}
                         />
                         <button className="send-button" onClick={sendMessage}>
-                            <img src={sendIcon} alt='sendIcon' style={{"textAlign": "center"}}/>
+                            <img src={sendIcon} alt='sendIcon' style={{ "textAlign": "center" }} />
                         </button>
                     </div>
-                </div>    
+                </div>
 
-                 {/* Modal de Pesquisa de Usuário */}         
+                {/* Modal de Pesquisa de Usuário */}
                 {isModalOpen && (
                     <div className="modal">
                         <div className="modal-content">
                             <h3>Buscar Usuário</h3>
-                            <hr/>
-                            <input 
-                            type="email" 
-                            className="input-message"
-                            style={{ marginLeft: '0px', width: '80%'}}
-                            placeholder="Digite o email do usuário"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            <hr />
+                            <input
+                                type="email"
+                                className="input-message"
+                                style={{ marginLeft: '0px', width: '80%' }}
+                                placeholder="Digite o email do usuário"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                             />
                             <button className="send-button" onClick={() => searchUser}>
-                                <img src={serchIcon} alt='serchIcon' style={{"textAlign": "center"}}/>
+                                <img src={serchIcon} alt='serchIcon' style={{ "textAlign": "center" }} />
                             </button>
                             <div className="modal-buttons">
                                 {/* Botão de Cancelar */}
-                                <button 
-                                    onClick={() =>{ 
+                                <button
+                                    onClick={() => {
                                         setModalOpen(false);
                                         //closeModal
-                                    }} 
+                                    }}
                                     style={{ padding: '10px 20px', marginRight: '10px', backgroundColor: 'red', color: '#fff', border: 'none', borderRadius: '5px' }}
                                 >
                                     Cancelar
                                 </button>
 
                                 {/* Botão de Adicionar */}
-                                <button 
+                                <button
                                     onClick={() => {
                                         //addUser
                                         setModalOpen(false);
-                                    }} 
+                                    }}
                                     style={{ padding: '10px 20px', backgroundColor: 'green', color: '#fff', border: 'none', borderRadius: '5px' }}
                                 >
                                     Adicionar
@@ -186,9 +191,9 @@ const ChatRoom = () => {
                         </div>
                     </div>
                 )}
-            {/* </div> */}
-        </div>
-    </>
+                {/* </div> */}
+            </div>
+        </>
     );
 };
 

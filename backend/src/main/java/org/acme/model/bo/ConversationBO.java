@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
+import org.acme.audit.Auditable;
 import org.acme.model.dao.ConversationDAO;
 import org.acme.model.dao.MessageDAO;
 import org.acme.model.dao.UserDAO;
@@ -18,6 +19,7 @@ public class ConversationBO {
     @Inject
     UserDAO userDAO;
     @Transactional
+    @Auditable
     public Conversation startConversation(Long user1Id, Long user2Id) {
         User user1 = userDAO.findById(user1Id);
         User user2 = userDAO.findById(user2Id);

@@ -1,11 +1,15 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import {Link, useNavigate} from 'react-router-dom';
-import logoLK from '/VisualStudio/linktalk/frontend/src/assets/linktalk.png';
-import ChatRoom from './chatRoom';
+import { Link, useNavigate } from 'react-router-dom';
+import logoLK from '/img/linktalk.png';
+import store from '../redux/store';
+import { useDispatch } from 'react-redux';
+import { set_socket } from '../redux/socketActions';
 
 const login = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [publicChat, setPublicChat] = useState([]);
     const [socket, setSocket] = useState(null);
     const [erroMessage, setErrorMessage] = useState(false);
@@ -32,7 +36,7 @@ const login = () => {
                 email: userData.email,
                 password: userData.password
             });
-
+            localStorage.setItem("token", response.data.token);
             const token = response.data.token;
             const conversationId = 1; // Defina o conversationId conforme necessário
 
@@ -71,64 +75,70 @@ const login = () => {
                 console.error('WebSocket error:', error);
             };
 
+            console.log(ws)
+
+            dispatch(set_socket(ws));
+
             setSocket(ws);
             const data = response.data;
             console.log(data);
             setTimeout(() => {
-                navigate('/chatRoom', {state: { userDataLogin: data }  });                
+                navigate('/chatRoom', { state: { userDataLogin: data } });
             }, 150);
         } catch (error) {
             setErrorMessage(true);
             console.error("Login failed:", error);
         }
+
+
     };
 
     return (
-        <div className='backgroud_login'> 
+        <div className='backgroud_login'>
             <div className='register'>
-                <img src={logoLK}/>
-                <h1 style={{"textAlign": "center"}}>Bem Vindo!</h1>
+                <img src={logoLK} />
+                <h1 style={{ "textAlign": "center" }}>Bem Vindo!</h1>
                 <form>
-                    {erroMessage === true ? 
-                    <h5 style={{color: "red"}}>Falha no Login. Verifique suas credenciais e tente novamente.</h5>:
-                    <h2></h2>
-                }
-                <input
-                    id='email'
-                    className="input-login"
-                    type='email'
-                    placeholder='Email'
-                    value={userData.email}
-                    onChange={(e) => setUserData((prevState) => ({
-                        ...prevState,
-                        email: e.target.value
-                    }))}
-                />
-                <input
-                    id='password'
-                    type='password'
-                    className="input-login"
-                    style={{marginTop: "10px"}}
-                    placeholder='Senha'
-                    value={userData.password}
-                    onChange={(e) => {
-                        setUserData((prevState) => ({
-                        ...prevState,
-                        password: e.target.value
-                    }));
-                    setErrorMessage(false);
-                }}
-                />
-                <button className="button-login" type='button' onClick={registerUser}>Login</button>
-                <Link style={{display: "block", textAlign: "center", marginTop: "10px" }} 
-                    to="/cadastro">
-                Não tem uma conta? Cadastre-se
-                </Link>
-            </form>
+                    {erroMessage === true ?
+                        <h5 style={{ color: "red" }}>Falha no Login. Verifique suas credenciais e tente novamente.</h5> :
+                        <h2></h2>
+                    }
+                    <input
+                        id='email'
+                        className="input-login"
+                        type='email'
+                        placeholder='Email'
+                        value={userData.email}
+                        onChange={(e) => setUserData((prevState) => ({
+                            ...prevState,
+                            email: e.target.value
+                        }))}
+                    />
+                    <input
+                        id='password'
+                        type='password'
+                        className="input-login"
+                        style={{ marginTop: "10px" }}
+                        placeholder='Senha'
+                        value={userData.password}
+                        onChange={(e) => {
+                            setUserData((prevState) => ({
+                                ...prevState,
+                                password: e.target.value
+                            }));
+                            setErrorMessage(false);
+                        }}
+                    />
+                    <button className="button-login" type='button' onClick={registerUser}>Login</button>
+                    <Link style={{ display: "block", textAlign: "center", marginTop: "10px" }}
+                        to="/cadastro">
+                        Não tem uma conta? Cadastre-se
+                    </Link>
+                </form>
+            </div>
+            {/* {isLoggedIn && <Navigate to="/chatRoom" replace={true}/>} */}
+            {/* {isLoggedIn && <ChatRoom userData={userData}/>} */}
         </div>
-    {/* {isLoggedIn && <Navigate to="/chatRoom" replace={true}/>} */}
-    {/* {isLoggedIn && <ChatRoom userData={userData}/>} */}
-    </div>
-);
+    );
 }
 export default login;

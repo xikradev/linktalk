@@ -39,4 +39,10 @@ public class UserController {
     public Response contactsByUserId(@PathParam("id") Long id){
         return Response.ok(userBO.contactsByUserId(id)).build();
     }
+
+    @GET
+    @Path("/email/{email}")
+    public Response getUserByEmail(@PathParam("email") String email){
+        return Response.ok(userBO.getUserByEmail(email)).build();
+    }
 }
