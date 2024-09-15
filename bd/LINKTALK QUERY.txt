@@ -4,6 +4,8 @@
 
 -- DROP TABLE IF EXISTS public.users;
 
+CREATE SEQUENCE users_id_seq;
+
 CREATE TABLE IF NOT EXISTS public.users
 (
     id integer NOT NULL DEFAULT nextval('users_id_seq'::regclass),
@@ -23,6 +25,8 @@ ALTER TABLE IF EXISTS public.users
 -- Table: public.message
 
 -- DROP TABLE IF EXISTS public.message;
+
+CREATE SEQUENCE message_id_seq;
 
 CREATE TABLE IF NOT EXISTS public.message
 (
@@ -55,6 +59,8 @@ ALTER TABLE IF EXISTS public.message
 
 -- DROP TABLE IF EXISTS public.conversation;
 
+CREATE SEQUENCE conversation_id_seq;
+
 CREATE TABLE IF NOT EXISTS public.conversation
 (
     id integer NOT NULL DEFAULT nextval('conversation_id_seq'::regclass),
@@ -74,4 +80,20 @@ CREATE TABLE IF NOT EXISTS public.conversation
 TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.conversation
+    OWNER to postgres;
+
+CREATE SEQUENCE audit_log_id_seq;
+
+CREATE TABLE IF NOT EXISTS public.audit_log
+(
+    id integer NOT NULL DEFAULT nextval('audit_log_id_seq'::regclass),
+    action character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    username character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    "timestamp" timestamp without time zone NOT NULL,
+    CONSTRAINT audit_log_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.audit_log
     OWNER to postgres;

@@ -37,7 +37,7 @@ button {
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgba(0, 0, 0, 0.4); 
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 .modal-content {
@@ -45,10 +45,10 @@ button {
   padding: 20px;
   border-radius: 10px;
   /* text-align: center; */
-  width: 400px; 
+  width: 400px;
 }
 
-.modal-buttons{
+.modal-buttons {
   margin-bottom: 0px;
   margin-top: 10%;
   display: flex;
@@ -58,21 +58,21 @@ button {
 .container {
   /* position: relative; */
   display: flex;
-  height: 100vh; 
+  height: 100vh;
 }
 
 /*CSS da tela de login*/
-.backgroud_login{
+.backgroud_login {
   margin: 0;
-    padding: 0;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #1c0228;
-    /* background-image: url('caminho/para/sua-imagem.png'); */
-    background-position: center;
-    background-repeat: no-repeat;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #1c0228;
+  /* background-image: url('caminho/para/sua-imagem.png'); */
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .register {
@@ -85,16 +85,15 @@ button {
   flex-direction: row;
 }
 
-.input-login{
+.input-login {
   padding: 10px;
   width: 95%;
   font-size: 1.2em;
   border-radius: 10px;
   border-width: 1px
-  
 }
 
-.button-login{
+.button-login {
   display: block;
   margin: 0 auto;
   padding: 10px 20px;
@@ -137,26 +136,28 @@ button {
 }
 
 .member-list {
-  width: 20%; /* Define a largura da lista de contatos */
-  background-color: #f0f0f0; /* Cor de fundo */
+  width: 20%;
+  /* Define a largura da lista de contatos */
+  background-color: #f0f0f0;
+  /* Cor de fundo */
   padding: 10px;
   border-right: 1px solid #ddd;
-  overflow-y: auto; 
+  overflow-y: auto;
   height: 100vh;
   flex-direction: column;
-  height: 100%; 
+  height: 100%;
 }
 
-.contact-list-wrapper { 
-  flex-grow: 1; 
-  overflow-y: auto; 
+.contact-list-wrapper {
+  flex-grow: 1;
+  overflow-y: auto;
   justify-content: space-between;
   height: 70%;
 }
 
-.user{
+.user {
   flex-direction: row;
-  position:static ;
+  position: static;
   padding: 5px 10px;
   position: sticky;
   bottom: 0;
@@ -168,11 +169,12 @@ button {
   display: flex;
   height: 100vh;
   /* flex: 1; */
-    flex-direction: column;
-    justify-content: space-between; /* Mantém o input sempre na parte inferior */
-    padding: 10px;
-    border-left: 1px solid #ddd;
-    position: relative;
+  flex-direction: column;
+  justify-content: space-between;
+  /* Mantém o input sempre na parte inferior */
+  padding: 10px;
+  border-left: 1px solid #ddd;
+  position: relative;
 
 }
 
@@ -180,7 +182,8 @@ button {
   /* height: 80%; */
   border: 1px solid #acacac;
   flex-grow: 1;
-  overflow-y: auto; /* Adiciona rolagem para as mensagens */
+  overflow-y: auto;
+  /* Adiciona rolagem para as mensagens */
   padding: 10px;
   /* border: 1px solid #ccc; */
   margin-bottom: 10px;
@@ -193,20 +196,20 @@ button {
   margin-bottom: 10px;
   position: relative;
 
-    align-items: center;
-    background-color: #f9f9f9;
-    border-radius: 20px;
-    padding: 5px 10px;
-    border: 1px solid #ccc;
+  align-items: center;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
 }
 
 .input-message {
   border-radius: 50px;
   flex: 1;
-    border: none;
-    outline: none;
-    padding: 10px;
-    background-color: #f0f0f0;
+  border: none;
+  outline: none;
+  padding: 10px;
+  background-color: #f0f0f0;
 }
 
 ul {
@@ -222,9 +225,9 @@ ul {
   /* cursor: pointer; */
 
   background-color: transparent;
-    border: none;
-    outline: none;
-    cursor: pointer;
+  border: none;
+  outline: none;
+  cursor: pointer;
 }
 
 .member {
@@ -254,15 +257,15 @@ ul {
   border-radius: 5px;
   color: #fff;
   width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    
-    
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    margin-right: 10px;
+  height: 40px;
+  border-radius: 50%;
+
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  margin-right: 10px;
 }
 
 .avatar.self {
@@ -274,15 +277,39 @@ ul {
   padding: 5px;
   width: auto;
   display: flex;
-  flex-direction: row;
-  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
-  margin: 5px 10px;
+
 }
 
 .message-data {
   padding: 5px;
+  width: auto;
 }
 
 .message.self {
   justify-content: end;
+}
+
+.message-content {
+  display: flex;
+  position: relative;
+  padding: 10px;
+  border-radius: 5px;
+  flex-direction: column;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+  margin: 5px 10px;
+}
+
+.arrow-edit {
+  right: 0;
+  position: absolute;
+  display: none;
+  cursor: pointer;
+}
+
+.message-content:hover .arrow-edit {
+  display: inline-block;
+}
+
+.edit-message>p:hover {
+  background: gray;
 }

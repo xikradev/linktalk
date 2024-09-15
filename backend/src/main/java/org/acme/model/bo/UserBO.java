@@ -4,9 +4,7 @@ import io.smallrye.jwt.build.Jwt;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.NotFoundException;
-import org.acme.audit.Auditable;
 import org.acme.exception.InvalidLoginException;
 import org.acme.model.dao.UserDAO;
 import org.acme.model.dto.UserContactDTO;
@@ -52,12 +50,12 @@ public class UserBO {
         UserLoginResponseDTO response = new UserLoginResponseDTO();
         response.setFullName(user.getFullName());
         response.setEmail(user.getEmail());
+        response.setId(user.getId());
         response.setToken(token);
         return response;
     }
 
     @Transactional
-    @Auditable
     public String findUserEmailById(Long id) {
         return userDAO.findUserEmailById(id);
     }
@@ -67,12 +65,10 @@ public class UserBO {
         return userDAO.findById(id);
     }
 
-    @Auditable
     public List<UserContactDTO> contactsByUserId(Long id) {
         return userDAO.contactsByUserId(id);
     }
 
-    @Auditable
     @Transactional
     public UserLoginResponseDTO getUserByEmail(String email) {
         User foundedUser = userDAO.findByEmail(email);
@@ -80,6 +76,7 @@ public class UserBO {
             UserLoginResponseDTO response = new UserLoginResponseDTO();
             response.setFullName(foundedUser.getFullName());
             response.setEmail(foundedUser.getEmail());
+            response.setId(foundedUser.getId());
             return response;
         } else {
             throw new NotFoundException("Usuario com Email: " + email + " não encontrado.");

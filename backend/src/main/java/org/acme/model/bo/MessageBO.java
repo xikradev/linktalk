@@ -4,14 +4,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
-import org.acme.audit.AuditInterceptor;
-import org.acme.audit.Auditable;
 import org.acme.model.dao.AuditLogDAO;
 import org.acme.model.dao.ConversationDAO;
 import org.acme.model.dao.MessageDAO;
 import org.acme.model.dao.UserDAO;
 import org.acme.model.dto.MessageResponseDTO;
-import org.acme.model.entity.AuditLog;
 import org.acme.model.entity.Conversation;
 import org.acme.model.entity.Message;
 import org.acme.model.entity.User;
@@ -19,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -28,7 +24,6 @@ import java.util.List;
 
 @ApplicationScoped
 public class MessageBO {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuditInterceptor.class);
     @Inject
     ConversationDAO conversationDAO;
     @Inject
@@ -39,7 +34,7 @@ public class MessageBO {
 
     @Inject
     UserDAO userDAO;
-    @Auditable
+
     public List<MessageResponseDTO> getConversationMessages(Long conversationId) {
         Conversation conversation = conversationDAO.findById(conversationId);
         List<Message> messages = messageDAO.getMessagesByConversation(conversation);
@@ -60,7 +55,6 @@ public class MessageBO {
         return messageResponseDTOS;
     }
     @Transactional
-    @Auditable
     public void deleteMessageById(Long messageId) {
         Message message = messageDAO.findById(messageId);
         if (message != null) {
@@ -87,7 +81,6 @@ public class MessageBO {
     }
 
     @Transactional
-    @Auditable
     public void updateMessageContent(Long messageId, String newContent) {
         Message message = messageDAO.findById(messageId);
         if (message != null) {

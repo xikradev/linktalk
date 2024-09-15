@@ -1,19 +1,16 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import logoLK from '/img/linktalk.png';
-import ChatRoom from './chatRoom';
 import VisibleIcon from '/img/olho.png';
 import NoVisibleIcon from '/img/naoVisivel.png';
-import { set_socket } from '../redux/socketActions';
 import { useDispatch } from 'react-redux';
+import { userLogin } from '../redux/userActions';
 
 const login = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [publicChat, setPublicChat] = useState([]);
-    const [socket, setSocket] = useState(null);
     const [erroMessage, setErrorMessage] = useState(false);
     const [userData, setUserData] = useState({
         username: '',
@@ -29,14 +26,6 @@ const login = () => {
     };
 
 
-    useEffect(() => {
-        // Limpar a conexão WebSocket quando o componente desmontar
-        return () => {
-            if (socket) {
-                socket.close();
-            }
-        };
-    }, [socket]);
 
     const registerUser = async () => {
         try {
@@ -45,53 +34,18 @@ const login = () => {
                 password: userData.password
             });
             localStorage.setItem("token", response.data.token);
-            const token = response.data.token;
-            const conversationId = 1; // Defina o conversationId conforme necessário
 
-            setUserData((prevState) => ({
-                ...prevState,
+            dispatch(userLogin({
+                id: response.data.id,
                 username: response.data.fullName,
-            }));
+                email: response.data.email,
+                connected: false,
+            }))
 
             console.log("Login response:", response.data);
 
-            // Configura o WebSocket
-            const ws = new WebSocket(`ws://localhost:8081/chat/${conversationId}/${token}`);
-            ws.onopen = () => {
-                setUserData((prevState) => ({
-                    ...prevState,
-                    connected: true,
-                }));
-                console.log('Connected to WebSocket');
-            };
-
-            ws.onmessage = (event) => {
-                console.log(event)
-                const messageData = JSON.parse(event.data);
-                setPublicChat((prevChat) => [...prevChat, messageData]);
-            };
-
-            ws.onclose = () => {
-                console.log('WebSocket connection closed');
-                setUserData((prevState) => ({
-                    ...prevState,
-                    connected: false,
-                }));
-            };
-
-            ws.onerror = (error) => {
-                console.error('WebSocket error:', error);
-            };
-
-            console.log(ws)
-
-            dispatch(set_socket(ws));
-
-            setSocket(ws);
-            const data = response.data;
-            console.log(data);
             setTimeout(() => {
-                navigate('/chatRoom', { state: { userDataLogin: data } });
+                navigate('/chatRoom');
             }, 150);
         } catch (error) {
             setErrorMessage(true);

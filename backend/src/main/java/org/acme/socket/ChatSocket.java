@@ -13,7 +13,6 @@ import jakarta.inject.Inject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
-import org.acme.audit.Auditable;
 import org.acme.model.bo.MessageBO;
 import org.acme.model.bo.UserBO;
 import org.acme.model.entity.Message;

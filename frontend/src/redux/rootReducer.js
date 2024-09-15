@@ -1,9 +1,9 @@
 import { combineReducers } from 'redux';
-import socketReducer from './socketReducer';
+import userReducer from './userReducer';
 // Importar outros reducers
 
 const rootReducer = combineReducers({
-    socket: socketReducer,
+    user: userReducer
     // Outros reducers
 });
 

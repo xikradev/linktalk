@@ -19,7 +19,6 @@ public class ConversationBO {
     @Inject
     UserDAO userDAO;
     @Transactional
-    @Auditable
     public Conversation startConversation(Long user1Id, Long user2Id) {
         User user1 = userDAO.findById(user1Id);
         User user2 = userDAO.findById(user2Id);
