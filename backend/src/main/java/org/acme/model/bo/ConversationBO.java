@@ -4,7 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
-import org.acme.audit.Auditable;
 import org.acme.model.dao.ConversationDAO;
 import org.acme.model.dao.MessageDAO;
 import org.acme.model.dao.UserDAO;

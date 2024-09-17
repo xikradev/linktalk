@@ -26,8 +26,10 @@ const DeleteMessageModal = ({ setModalOpen, messageId, refreshMessages }) => {
                     <button
                         onClick={() => {
                             setModalOpen(false);
-                            axios.delete(`http://localhost:8081/message/${messageId}`)
-                            refreshMessages()
+                            axios.delete(`http://localhost:8081/message/${messageId}`).then(() => {
+                                refreshMessages();
+                            })
+
                         }}
                         style={{ padding: '10px 20px', backgroundColor: 'green', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
                     >

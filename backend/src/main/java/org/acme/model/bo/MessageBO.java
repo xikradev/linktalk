@@ -4,12 +4,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
-import org.acme.model.dao.AuditLogDAO;
-import org.acme.model.dao.ConversationDAO;
-import org.acme.model.dao.MessageDAO;
-import org.acme.model.dao.UserDAO;
+import org.acme.model.dao.*;
 import org.acme.model.dto.MessageResponseDTO;
 import org.acme.model.entity.Conversation;
+import org.acme.model.entity.Image;
 import org.acme.model.entity.Message;
 import org.acme.model.entity.User;
 import org.slf4j.Logger;
@@ -28,6 +26,8 @@ public class MessageBO {
     ConversationDAO conversationDAO;
     @Inject
     MessageDAO messageDAO;
+    @Inject
+    ImageDAO imageDAO;
 
     @Inject
     AuditLogDAO auditLogDAO;
@@ -37,9 +37,12 @@ public class MessageBO {
 
     public List<MessageResponseDTO> getConversationMessages(Long conversationId) {
         Conversation conversation = conversationDAO.findById(conversationId);
-        List<Message> messages = messageDAO.getMessagesByConversation(conversation);
+        List<Object[]> results = messageDAO.getMessagesByConversation(conversation);
         List<MessageResponseDTO> messageResponseDTOS = new ArrayList<>();
-        for (Message message : messages) {
+        for (Object[] result : results) {
+            Message message = (Message) result[0]; // O primeiro elemento é a entidade Message
+            String imageUrl = (String) result[1];  // O segundo elemento é a URL da imagem ou null
+
             MessageResponseDTO messageResponseDTO = new MessageResponseDTO();
             messageResponseDTO.setId(message.getId());
             messageResponseDTO.setContent(message.getContent());
@@ -50,6 +53,7 @@ public class MessageBO {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
             String formattedTime = time.format(formatter);
             messageResponseDTO.setTimeSented(formattedTime);
+            messageResponseDTO.setImgUrl(imageUrl);
             messageResponseDTOS.add(messageResponseDTO);
         }
         return messageResponseDTOS;
@@ -57,6 +61,10 @@ public class MessageBO {
     @Transactional
     public void deleteMessageById(Long messageId) {
         Message message = messageDAO.findById(messageId);
+        Image image = imageDAO.findByMessageId(message);
+        if(image != null){
+            imageDAO.delete(image);
+        }
         if (message != null) {
             messageDAO.delete(message);
         } else {

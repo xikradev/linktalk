@@ -192,11 +192,10 @@ button {
 
 .send-message {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   margin-bottom: 10px;
   position: relative;
-
-  align-items: center;
+  justify-content: flex-start;
   background-color: #f9f9f9;
   border-radius: 20px;
   padding: 5px 10px;
@@ -281,6 +280,8 @@ ul {
 }
 
 .message-data {
+  display: flex;
+  flex-direction: column;
   padding: 5px;
   width: auto;
 }
@@ -312,4 +313,33 @@ ul {
 
 .edit-message>p:hover {
   background: gray;
+}
+
+.add-image {
+  width: 40px;
+  height: 40px;
+  background-color: purple;
+  display: flex;
+  margin-right: 8px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 30%;
+  cursor: pointer;
+}
+
+.add-image:hover {
+  background-color: rgb(88, 0, 88);
+}
+
+.image-preview {
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 40px;
 }

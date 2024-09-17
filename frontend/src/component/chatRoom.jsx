@@ -8,11 +8,11 @@ import userIcon from '/img/user.png';
 import logoutIcon from '/img/logout.png';
 import store from '../redux/store';
 import ArrowEditIcon from '/img/seta-edit.png';
+import imageIcon from '/img/imageIcon.png';
 import DeleteMessageModal from './modals/deleteMessageModal';
 
 const ChatRoom = () => {
     const navigate = useNavigate();
-    const location = useLocation(); // Access location object
     const [publicChat, setPublicChat] = useState([]);
     const [contacts, setContacts] = useState([])
     const [selectedContact, setSelectedContact] = useState(null);
@@ -22,6 +22,8 @@ const ChatRoom = () => {
     const [openEditMessage, setOpenEditMessage] = useState(null);
     const [openDeleteMessageModal, setOpenDeleteMessageModal] = useState(false);
     const [selectedMessageId, setSelectedMessageId] = useState(null);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
     // modal de pesquisa de usuário
     const [isModalOpen, setModalOpen] = useState(false);
     const [email, setEmail] = useState("");
@@ -113,8 +115,10 @@ const ChatRoom = () => {
     }, [socket]);
 
     useEffect(() => {
-        getConversations();
-    }, [])
+        if (userData.id !== null) {
+            getConversations();
+        }
+    }, [userData])
 
 
     useEffect(() => {
@@ -138,9 +142,11 @@ const ChatRoom = () => {
                 content: userData.message,
                 timeSented: new Date().toLocaleTimeString(),
             };
-            socket.send(newMessage.content);
+            socket.send(JSON.stringify({ text: newMessage.content, image: selectedImage }));
 
             setUserData(prevState => ({ ...prevState, message: '' }));
+            setSelectedImage(null);
+            setImagePreview(null);
         }
     };
 
@@ -192,6 +198,23 @@ const ChatRoom = () => {
     useEffect(() => {
         console.log(publicChat)
     }, [publicChat])
+
+    const handleFileChange = (event) => {
+        console.log(event.target.value)
+        const selectedFile = event.target.files[0];
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setSelectedImage(reader.result.split(",")[1]); // Base64 encoded image
+        };
+        reader.readAsDataURL(selectedFile);
+
+        // Gerar uma URL de pré-visualização
+        if (selectedFile) {
+            const previewUrl = URL.createObjectURL(selectedFile);
+            setImagePreview(previewUrl);
+        }
+        event.target.value = "";
+    };
 
     return (
         <>
@@ -259,7 +282,8 @@ const ChatRoom = () => {
 
                                             {/* Conteúdo da mensagem */}
                                             <div className="message-data">
-                                                {chat.content}
+                                                {chat?.imgUrl !== null && <img src={chat.imgUrl}></img>}
+                                                <span>{chat.content}</span>
                                             </div>
 
                                             {/* Avatar do remetente no caso do próprio usuário */}
@@ -278,7 +302,6 @@ const ChatRoom = () => {
                                                         color: 'black',
                                                         boxShadow: '0 3px 10px rgb(0 0 0 / 0.2)'
                                                     }}>
-                                                        <p style={{ margin: '0px', textAlign: 'center', padding: '6px 12px', cursor: 'pointer' }}>Editar</p>
                                                         <p style={{ margin: '0px', textAlign: 'center', padding: '6px 12px', cursor: 'pointer' }} onClick={() => { setOpenDeleteMessageModal(true); setSelectedMessageId(chat.id) }}>Deletar</p>
                                                     </div>}
                                                     <div className="avatar self">{chat.senderName}</div>
@@ -292,20 +315,35 @@ const ChatRoom = () => {
                             </li>
                         ))}
                     </ul>) : <div>teste</div>}
+
                     <div className="send-message" >
-                        <input
-                            type="text"
-                            className="input-message"
-                            placeholder="Digite uma mensagem..."
-                            value={userData.message}
-                            onChange={handleMessageChange}
-                        />
-                        <button className="send-button" onClick={() => {
-                            setUserData((prevState) => ({ ...prevState, message: '' }));
-                            sendMessage()
+                        {imagePreview && <div className='image-preview'><img src={imagePreview} width={30} height={30} alt="" /><span onClick={() => {
+                            setSelectedImage(null);
+                            setImagePreview(null);
+                        }} style={{ marginTop: "-30px", paddingLeft: '5px', cursor: "pointer" }}>x</span></div>}
+                        <div style={{
+                            display: "flex",
+                            flexDirection: 'row',
+                            width: "100%"
                         }}>
-                            <img src={sendIcon} alt='sendIcon' style={{ "textAlign": "center" }} />
-                        </button>
+                            <input type="file" id="imageInput" name="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange}></input>
+                            <button className='add-image' onClick={() => document.getElementById("imageInput").click()}> <img src={imageIcon} alt="" width={30} /></button>
+
+
+                            <input
+                                type="text"
+                                className="input-message"
+                                placeholder="Digite uma mensagem..."
+                                value={userData.message}
+                                onChange={handleMessageChange}
+                            />
+                            <button className="send-button" onClick={() => {
+                                setUserData((prevState) => ({ ...prevState, message: '' }));
+                                sendMessage()
+                            }}>
+                                <img src={sendIcon} alt='sendIcon' style={{ "textAlign": "center" }} />
+                            </button>
+                        </div>
                     </div>
                 </div>
 

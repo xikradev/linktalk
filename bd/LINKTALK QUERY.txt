@@ -97,3 +97,23 @@ TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.audit_log
     OWNER to postgres;
+
+CREATE SEQUENCE message_image_id_seq;
+
+
+CREATE TABLE IF NOT EXISTS public.message_image
+(
+    id integer NOT NULL DEFAULT nextval('message_image_id_seq'::regclass),
+    url character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    message_id integer,
+    CONSTRAINT pk_message_image PRIMARY KEY (id),
+    CONSTRAINT fk_message FOREIGN KEY (message_id)
+        REFERENCES public.message (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.message_image
+    OWNER to postgres;

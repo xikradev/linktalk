@@ -19,8 +19,13 @@ public class MessageDAO {
         em.persist(message);
     }
 
-    public List<Message> getMessagesByConversation(Conversation conversation){
-        return em.createQuery("SELECT m FROM Message m WHERE m.conversation = :conversation ORDER BY m.timestamp", Message.class)
+    public List<Object[]> getMessagesByConversation(Conversation conversation){
+        return em.createQuery(
+                        "SELECT m, i.url AS imageUrl " +
+                                "FROM Message m " +
+                                "LEFT JOIN Image i ON i.message = m " +
+                                "WHERE m.conversation = :conversation " +
+                                "ORDER BY m.timestamp",Object[].class)
                 .setParameter("conversation", conversation)
                 .getResultList();
     }

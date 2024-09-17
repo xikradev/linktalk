@@ -12,6 +12,15 @@ public class MessageResponseDTO {
     private String senderEmail;
     private String content;
     private String timeSented;
+    private String imgUrl;
+
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
+    }
 
     public Long getId() {
         return id;
