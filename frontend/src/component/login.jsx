@@ -35,11 +35,14 @@ const login = () => {
             });
             localStorage.setItem("token", response.data.token);
 
+            sessionStorage.setItem('user', JSON.stringify(response.data));
+
             dispatch(userLogin({
                 id: response.data.id,
                 username: response.data.fullName,
                 email: response.data.email,
                 connected: false,
+                token: response.data.token,
             }))
 
             console.log("Login response:", response.data);

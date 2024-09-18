@@ -9,6 +9,7 @@ import logoutIcon from '/img/logout.png';
 import store from '../redux/store';
 import ArrowEditIcon from '/img/seta-edit.png';
 import imageIcon from '/img/imageIcon.png';
+import LinkTalk from '/img/linktalk.png';
 import DeleteMessageModal from './modals/deleteMessageModal';
 
 const ChatRoom = () => {
@@ -16,6 +17,7 @@ const ChatRoom = () => {
     const [publicChat, setPublicChat] = useState([]);
     const [contacts, setContacts] = useState([])
     const [selectedContact, setSelectedContact] = useState(null);
+    const [selectedGroup, setSelectedGroup] = useState(null);
     const [socket, setSocket] = useState(null);
     const [tab, setTab] = useState("CHATS");
     const scrollContainerRef = useRef();
@@ -24,6 +26,8 @@ const ChatRoom = () => {
     const [selectedMessageId, setSelectedMessageId] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
+    const [isContactList, setIsContactList] = useState(true);
+    const [groups, setGroups] = useState([]);
     // modal de pesquisa de usuário
     const [isModalOpen, setModalOpen] = useState(false);
     const [email, setEmail] = useState("");
@@ -33,6 +37,7 @@ const ChatRoom = () => {
         email: '',
         message: '',
         connected: false,
+        token: ''
     });
 
     useEffect(() => {
@@ -59,20 +64,27 @@ const ChatRoom = () => {
     }, [selectedContact]);
 
     useEffect(() => {
+        const user = JSON.parse(sessionStorage.getItem("user"));
+
+
         setUserData({
-            id: store.getState().user.user.id,
-            username: store.getState().user.user.username,
-            email: store.getState().user.user.email,
+            id: user.id,
+            username: user.fullName,
+            email: user.email,
             message: '',
             connected: false,
+            token: user.token
         })
-    }, [store.getState().user.user])
+
+
+
+    }, [])
 
     useEffect(() => {
         console.log(selectedContact)
-        if (selectedContact !== null) {
-            console.log("websocket")
-            const ws = new WebSocket(`ws://localhost:8081/chat/${selectedContact?.conversationId}/${localStorage.getItem("token")}`);
+        if (selectedContact !== null || selectedGroup !== null) {
+            console.log(userData.token)
+            const ws = new WebSocket(`ws://localhost:8081/${isContactList ? "conversation" : "group"}/${isContactList ? selectedContact?.conversationId : selectedGroup.id}/${userData.token}`);
             ws.onopen = () => {
                 setUserData((prevState) => ({
                     ...prevState,
@@ -103,7 +115,7 @@ const ChatRoom = () => {
 
             setSocket(ws);
         }
-    }, [selectedContact])
+    }, [selectedContact, selectedGroup])
 
     useEffect(() => {
         // Limpar a conexão WebSocket quando o componente desmontar
@@ -117,6 +129,7 @@ const ChatRoom = () => {
     useEffect(() => {
         if (userData.id !== null) {
             getConversations();
+            getGroups();
         }
     }, [userData])
 
@@ -127,7 +140,13 @@ const ChatRoom = () => {
 
     const getMessagesByConversation = async (conversationId) => {
         console.log(conversationId)
-        const response = await axios.get(`http://localhost:8081/message?conversationId=${conversationId}`)
+        const response = await axios.get(`http://localhost:8081/message/conversation/${conversationId}`)
+        console.log(response.data);
+        setPublicChat([...response.data]);
+    }
+
+    const getMessagesByGroup = async (groupId) => {
+        const response = await axios.get(`http://localhost:8081/message/group/${groupId}`)
         console.log(response.data);
         setPublicChat([...response.data]);
     }
@@ -194,6 +213,12 @@ const ChatRoom = () => {
         setContacts([...result.data]);
     }
 
+    const getGroups = async () => {
+        const result = await axios.get(`http://localhost:8081/user/${userData.id}/groups`);
+        console.log(result.data);
+        setGroups([...result.data]);
+    }
+
 
     useEffect(() => {
         console.log(publicChat)
@@ -221,9 +246,7 @@ const ChatRoom = () => {
             <div className='container'>
                 {/* <div className="chat-box"> */}
                 <div className="member-list">
-                    <div style={{ "display": "flex", "alignItems": "center" }}>
-                        <label>Conversas</label>
-                        {/*Abrir a modal para adicionar um novo usuário a lista de contatos*/}
+                    <div>
                         <button
                             className="send-button"
                             onClick={() => setModalOpen(true)}
@@ -232,9 +255,15 @@ const ChatRoom = () => {
                             <img src={newChatIcon} alt='newChatIcon' style={{ "textAlign": "center", width: "20px" }} />
                         </button>
                     </div>
+                    <div style={{ "display": "flex", "alignItems": "center", justifyContent: "space-around" }}>
+                        {/*Abrir a modal para adicionar um novo usuário a lista de contatos*/}
+                        <label style={{ cursor: "pointer", borderBottom: isContactList && "2px solid purple" }} onClick={() => setIsContactList(true)}>Conversas</label>
+                        <label style={{ cursor: "pointer", borderBottom: !isContactList && "2px solid purple" }} onClick={() => setIsContactList(false)}>Grupo</label>
+
+                    </div>
                     <hr />
                     <div className='contact-list'>
-                        <ul>
+                        {isContactList ? (<ul>
                             {contacts.map((contact, index) => {
                                 return (
                                     <li key={index}
@@ -251,7 +280,26 @@ const ChatRoom = () => {
                                     </li>
                                 );
                             })}
-                        </ul>
+                        </ul>) : (
+                            <ul>
+                                {groups.map((group, index) => {
+                                    return (
+                                        <li key={index}
+                                            onClick={() => {
+                                                getMessagesByGroup(group.id)
+                                                setTab(group.name)
+                                                setSelectedGroup(group)
+                                            }}
+                                            className={`member ${tab === group.name && "active"}`} >
+                                            <div style={{ "display": "flex", "alignItems": "center" }}>
+                                                <img src={userIcon} style={{ marginRight: '10px' }} />
+                                                {group.name}
+                                            </div>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        )}
                     </div>
                     <div className='user'>
                         <hr />
@@ -268,83 +316,90 @@ const ChatRoom = () => {
                     </div>
                 </div>
                 <div className="chat-content">
-                    {selectedContact !== null ? (<ul className="chat-messages" ref={scrollContainerRef} >
-                        {publicChat.map((chat, index) => (
-                            <li className={`message ${chat.senderEmail === userData.email ? "self" : ""}`} key={index}>
-                                <div style={{ position: 'relative' }}>
+                    {selectedContact !== null || selectedGroup !== null ?
+                        <><ul className="chat-messages" ref={scrollContainerRef} >
+                            {publicChat.map((chat, index) => (
+                                <li className={`message ${chat.senderEmail === userData.email ? "self" : ""}`} key={index}>
+                                    <div style={{ position: 'relative' }}>
 
-                                    <div className='message-content'>{/* Avatar do remetente */}
-                                        <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                            {chat.senderEmail !== userData.email && (
-                                                <div className="avatar">{chat.senderName}</div>
+                                        <div className='message-content'>{/* Avatar do remetente */}
+                                            {!isContactList && chat.senderEmail !== userData.email && <div style={{ color: "blue", textAlign: "start", marginBottom: "8px" }}>{chat.senderEmail}</div>}
+                                            <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                                {chat.senderEmail !== userData.email && (
+                                                    <div className="avatar">{chat.senderName}</div>
 
-                                            )}
+                                                )}
 
-                                            {/* Conteúdo da mensagem */}
-                                            <div className="message-data">
-                                                {chat?.imgUrl !== null && <img src={chat.imgUrl}></img>}
-                                                <span>{chat.content}</span>
+                                                {/* Conteúdo da mensagem */}
+                                                <div className="message-data">
+                                                    {chat?.imgUrl !== null && <img src={chat.imgUrl}></img>}
+                                                    <span>{chat.content}</span>
+                                                </div>
+
+                                                {/* Avatar do remetente no caso do próprio usuário */}
+                                                {chat.senderEmail === userData.email && (
+                                                    <>
+
+                                                        <img className="arrow-edit" src={ArrowEditIcon} width={20} height={20} onClick={() => {
+                                                            if (openEditMessage === index) {
+                                                                setOpenEditMessage(null)
+                                                            } else {
+                                                                setOpenEditMessage(index)
+                                                            }
+                                                        }} />
+                                                        {openEditMessage === index && <div className='edit-message' style={{
+                                                            position: 'absolute', width: 'auto', background: 'green', right: 2, top: -50, backgroundColor: '#FFF',
+                                                            color: 'black',
+                                                            boxShadow: '0 3px 10px rgb(0 0 0 / 0.2)'
+                                                        }}>
+                                                            <p style={{ margin: '0px', textAlign: 'center', padding: '6px 12px', cursor: 'pointer' }} onClick={() => { setOpenDeleteMessageModal(true); setSelectedMessageId(chat.id) }}>Deletar</p>
+                                                        </div>}
+                                                        <div className="avatar self">{chat.senderName}</div>
+                                                    </>
+                                                )}
                                             </div>
-
-                                            {/* Avatar do remetente no caso do próprio usuário */}
-                                            {chat.senderEmail === userData.email && (
-                                                <>
-
-                                                    <img className="arrow-edit" src={ArrowEditIcon} width={20} height={20} onClick={() => {
-                                                        if (openEditMessage === index) {
-                                                            setOpenEditMessage(null)
-                                                        } else {
-                                                            setOpenEditMessage(index)
-                                                        }
-                                                    }} />
-                                                    {openEditMessage === index && <div className='edit-message' style={{
-                                                        position: 'absolute', width: 'auto', background: 'green', right: 2, top: -50, backgroundColor: '#FFF',
-                                                        color: 'black',
-                                                        boxShadow: '0 3px 10px rgb(0 0 0 / 0.2)'
-                                                    }}>
-                                                        <p style={{ margin: '0px', textAlign: 'center', padding: '6px 12px', cursor: 'pointer' }} onClick={() => { setOpenDeleteMessageModal(true); setSelectedMessageId(chat.id) }}>Deletar</p>
-                                                    </div>}
-                                                    <div className="avatar self">{chat.senderName}</div>
-                                                </>
-                                            )}
+                                            <div style={{ display: 'flex', justifyContent: 'end' }}>{chat.timeSented}</div>
                                         </div>
-                                        <div style={{ display: 'flex', justifyContent: 'end' }}>{chat.timeSented}</div>
                                     </div>
+
+                                </li>
+                            ))}
+                        </ul>
+                            <div className="send-message" >
+                                {imagePreview && <div className='image-preview'><img src={imagePreview} width={30} height={30} alt="" /><span onClick={() => {
+                                    setSelectedImage(null);
+                                    setImagePreview(null);
+                                }} style={{ marginTop: "-30px", paddingLeft: '5px', cursor: "pointer" }}>x</span></div>}
+                                <div style={{
+                                    display: "flex",
+                                    flexDirection: 'row',
+                                    width: "100%"
+                                }}>
+                                    <input type="file" id="imageInput" name="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange}></input>
+                                    <button className='add-image' onClick={() => document.getElementById("imageInput").click()}> <img src={imageIcon} alt="" width={30} /></button>
+
+
+                                    <input
+                                        type="text"
+                                        className="input-message"
+                                        placeholder="Digite uma mensagem..."
+                                        value={userData.message}
+                                        onChange={handleMessageChange}
+                                    />
+                                    <button className="send-button" onClick={() => {
+                                        setUserData((prevState) => ({ ...prevState, message: '' }));
+                                        sendMessage()
+                                    }}>
+                                        <img src={sendIcon} alt='sendIcon' style={{ "textAlign": "center" }} />
+                                    </button>
                                 </div>
-
-                            </li>
-                        ))}
-                    </ul>) : <div>teste</div>}
-
-                    <div className="send-message" >
-                        {imagePreview && <div className='image-preview'><img src={imagePreview} width={30} height={30} alt="" /><span onClick={() => {
-                            setSelectedImage(null);
-                            setImagePreview(null);
-                        }} style={{ marginTop: "-30px", paddingLeft: '5px', cursor: "pointer" }}>x</span></div>}
-                        <div style={{
-                            display: "flex",
-                            flexDirection: 'row',
-                            width: "100%"
-                        }}>
-                            <input type="file" id="imageInput" name="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange}></input>
-                            <button className='add-image' onClick={() => document.getElementById("imageInput").click()}> <img src={imageIcon} alt="" width={30} /></button>
-
-
-                            <input
-                                type="text"
-                                className="input-message"
-                                placeholder="Digite uma mensagem..."
-                                value={userData.message}
-                                onChange={handleMessageChange}
-                            />
-                            <button className="send-button" onClick={() => {
-                                setUserData((prevState) => ({ ...prevState, message: '' }));
-                                sendMessage()
-                            }}>
-                                <img src={sendIcon} alt='sendIcon' style={{ "textAlign": "center" }} />
-                            </button>
-                        </div>
-                    </div>
+                            </div>
+                        </> :
+                        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: '100%', flexDirection: "column" }}>
+                            <img src={LinkTalk}></img>
+                            <p style={{ fontWeight: 'bolder', fontSize: "25px" }}>Vamos Conversar!!</p>
+                            <span style={{ marginTop: "-20px" }}>Clique em uma conversa para iniciar</span>
+                        </div>}
                 </div>
 
                 {/* Modal de Pesquisa de Usuário */}
@@ -397,7 +452,7 @@ const ChatRoom = () => {
                 )}
                 {/* </div> */}
                 {openDeleteMessageModal && <DeleteMessageModal setModalOpen={(e) => setOpenDeleteMessageModal(e)} messageId={selectedMessageId} refreshMessages={async () => {
-                    const response = await axios.get(`http://localhost:8081/message?conversationId=${selectedContact.conversationId}`)
+                    const response = await axios.get(`http://localhost:8081/message/${isContactList ? 'conversation' : 'group'}/${isContactList ? selectedContact.conversationId : selectedGroup.id}`)
                     setPublicChat(response.data);
                 }} />}
             </div >

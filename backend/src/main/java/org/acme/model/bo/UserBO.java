@@ -7,13 +7,12 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import org.acme.exception.InvalidLoginException;
 import org.acme.model.dao.UserDAO;
-import org.acme.model.dto.UserContactDTO;
-import org.acme.model.dto.UserLoginRequestDTO;
-import org.acme.model.dto.UserLoginResponseDTO;
-import org.acme.model.dto.UserRegisterDTO;
+import org.acme.model.dto.*;
+import org.acme.model.entity.Group;
 import org.acme.model.entity.User;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -81,5 +80,20 @@ public class UserBO {
         } else {
             throw new NotFoundException("Usuario com Email: " + email + " não encontrado.");
         }
+    }
+
+    public List<GroupResponseDTO> getUserGroups(Long userId) {
+        List<Group> groups = userDAO.getUserGroups(userId);
+        List<GroupResponseDTO> groupResponseDTOS = new ArrayList<>();
+        for(Group group : groups){
+            GroupResponseDTO groupResponseDTO = new GroupResponseDTO();
+
+            groupResponseDTO.setId(group.getId());
+            groupResponseDTO.setName(group.getName());
+            groupResponseDTO.setAdmin(userDAO.isAdmin(userId, group.getId()));
+
+            groupResponseDTOS.add(groupResponseDTO);
+        }
+        return groupResponseDTOS;
     }
 }

@@ -13,7 +13,7 @@ public class ImageBO {
     @Inject
     ImageDAO imageDAO;
 
-    public String saveImage(String base64Image, Long conversationId, Long senderId, Message message) throws FileNotFoundException {
-        return imageDAO.saveImage(base64Image, conversationId,senderId, message);
+    public String saveImage(String base64Image, Long chatId, Long senderId, Message message, String typeChat) throws FileNotFoundException {
+        return imageDAO.saveImage(base64Image, chatId,senderId, message, typeChat);
     }
 }

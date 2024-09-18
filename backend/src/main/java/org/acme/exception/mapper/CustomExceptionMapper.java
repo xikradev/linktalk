@@ -1,5 +1,6 @@
 package org.acme.exception.mapper;
 
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
@@ -20,6 +21,12 @@ public class CustomExceptionMapper implements ExceptionMapper<Throwable> {
 
         if (exception instanceof NotFoundException) {
             return Response.status(Response.Status.NOT_FOUND)
+                    .entity(new CustomExceptionMessage(exception.getMessage()))
+                    .build();
+        }
+
+        if (exception instanceof BadRequestException) {
+            return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new CustomExceptionMessage(exception.getMessage()))
                     .build();
         }

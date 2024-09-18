@@ -11,6 +11,10 @@ public class Message {
     @ManyToOne
     @JoinColumn(name = "conversation_id", nullable = false)
     private Conversation conversation;
+
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private Group group;
     @ManyToOne
     @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
@@ -20,6 +24,14 @@ public class Message {
     private Long timestamp;
     @Column(name = "sender_email")
     private String senderEmail;
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
+    }
 
     public String getSenderEmail() {
         return senderEmail;

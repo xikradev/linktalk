@@ -45,4 +45,10 @@ public class UserController {
     public Response getUserByEmail(@PathParam("email") String email){
         return Response.ok(userBO.getUserByEmail(email)).build();
     }
+
+    @GET
+    @Path("/{userId}/groups")
+    public Response getUserGroups(@PathParam("userId")Long userId){
+        return Response.ok(userBO.getUserGroups(userId)).build();
+    }
 }

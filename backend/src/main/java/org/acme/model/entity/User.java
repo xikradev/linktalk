@@ -2,6 +2,8 @@ package org.acme.model.entity;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -11,6 +13,20 @@ public class User {
     private String fullName;
     private String email;
     private String password;
+
+    @ManyToMany(mappedBy = "members")
+    private List<Group> groups;
+
+    @OneToMany(mappedBy = "user")
+    private List<GroupAdmin> adminGroups;
+
+    public List<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<Group> groups) {
+        this.groups = groups;
+    }
 
     public Long getId() {
         return id;

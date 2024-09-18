@@ -25,14 +25,15 @@ import io.smallrye.jwt.auth.principal.JWTParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-@ServerEndpoint("/conversation/{conversationId}/{token}")
-public class ChatSocket {
+@ServerEndpoint("/group/{groupId}/{token}")
+public class GroupSocket {
 
     @Inject
     MessageBO messageBO;
 
     @Inject
     ImageBO imageBO;
+
     @Inject
     UserBO userBO;
 
@@ -40,29 +41,29 @@ public class ChatSocket {
     JWTParser jwtParser;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final Map<Long, Map<Session, Long>> activeSessions = new ConcurrentHashMap<>();
+    private static final Map<Long, Map<Session, Long>> activeGroupSessions = new ConcurrentHashMap<>();
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("conversationId") Long conversationId,
-            @PathParam("token") String token) {
+    public void onOpen(Session session, @PathParam("groupId") Long groupId,
+                       @PathParam("token") String token) {
         Long userId = getUserIdFromToken(token);
-        activeSessions.computeIfAbsent(conversationId, k -> new ConcurrentHashMap<>())
+        // Aqui você pode adicionar lógica para verificar se o usuário faz parte do grupo
+        activeGroupSessions.computeIfAbsent(groupId, k -> new ConcurrentHashMap<>())
                 .put(session, userId);
-        System.out.println("WebSocket opened for conversationId " + conversationId);
+        System.out.println("WebSocket opened for groupId " + groupId);
     }
 
     @OnMessage
-    public void onMessage(String message, Session session, @PathParam("conversationId") Long conversationId) {
-        Long senderId = activeSessions.get(conversationId).get(session);
+    public void onMessage(String message, Session session, @PathParam("groupId") Long groupId) {
+        Long senderId = activeGroupSessions.get(groupId).get(session);
 
         CompletableFuture<String> senderEmailFuture = CompletableFuture.supplyAsync(() -> {
             return userBO.findUserEmailById(senderId);
         });
 
-        // Aguarda até que o email seja obtido e a mensagem seja salva
         senderEmailFuture.thenAccept(senderEmail -> {
 
-            try{
+            try {
                 JsonObject jsonMessage = Json.createReader(new StringReader(message)).readObject();
                 String text = jsonMessage.getString("text", null);
                 String base64Image = jsonMessage.getString("image", null);
@@ -76,44 +77,38 @@ public class ChatSocket {
 
                 if (base64Image != null) {
                     // Processa a imagem
-                    Message messageSaved = messageBO.sendMessage(conversationId, senderId, senderEmail, currentTimeMillis, text);
+                    Message messageSaved = messageBO.sendMessageToGroup(groupId, senderId, senderEmail, currentTimeMillis, text);
 
-                    String imageUrl = imageBO.saveImage(base64Image, conversationId, senderId, messageSaved, "conv");
-
-                    // Cria uma URL para a imagem
-
-
-                    // Envia a mensagem de imagem para o chat
+                    String imageUrl = imageBO.saveImage(base64Image, groupId, senderId, messageSaved, "group");
 
                     // Transmite a mensagem de imagem para todos os clientes conectados
-                    broadcastMessage(messageSaved.getId(), conversationId, senderEmail, formattedTime, text,imageUrl);
+                    broadcastMessage(messageSaved.getId(), groupId, senderEmail, formattedTime, text, imageUrl);
                 } else if (text != null) {
                     // Processa a mensagem de texto
-                    Message messageSaved = messageBO.sendMessage(conversationId, senderId, senderEmail, currentTimeMillis, text);
+                    Message messageSaved = messageBO.sendMessageToGroup(groupId, senderId, senderEmail, currentTimeMillis, text);
 
                     // Transmite a mensagem de texto para todos os clientes conectados
-                    broadcastMessage(messageSaved.getId(), conversationId, senderEmail, formattedTime, text, null);
+                    broadcastMessage(messageSaved.getId(), groupId, senderEmail, formattedTime, text, null);
                 }
-            }catch (Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }).exceptionally(ex -> {
-            // Trata qualquer exceção que possa ocorrer durante o processo
             ex.printStackTrace();
             return null;
         });
     }
 
     @OnClose
-    public void onClose(Session session, @PathParam("conversationId") Long conversationId) {
-        Map<Session, Long> sessions = activeSessions.get(conversationId);
+    public void onClose(Session session, @PathParam("groupId") Long groupId) {
+        Map<Session, Long> sessions = activeGroupSessions.get(groupId);
         if (sessions != null) {
             sessions.remove(session);
             if (sessions.isEmpty()) {
-                activeSessions.remove(conversationId);
+                activeGroupSessions.remove(groupId);
             }
         }
-        System.out.println("WebSocket closed for conversationId " + conversationId);
+        System.out.println("WebSocket closed for groupId " + groupId);
     }
 
     @OnError
@@ -121,10 +116,10 @@ public class ChatSocket {
         throwable.printStackTrace();
     }
 
-    private void broadcastMessage(Long messageId,Long conversationId, String senderEmail, String timeSented, String content, String imageUrl) {
-        Map<Session, Long> sessions = activeSessions.get(conversationId);
+    private void broadcastMessage(Long messageId, Long groupId, String senderEmail, String timeSented, String content, String imageUrl) {
+        Map<Session, Long> sessions = activeGroupSessions.get(groupId);
         if (sessions != null) {
-            String formattedMessage = formatMessage(messageId,senderEmail, timeSented, content,imageUrl);
+            String formattedMessage = formatMessage(messageId, senderEmail, timeSented, content, imageUrl);
             sessions.keySet().forEach(session -> {
                 CompletableFuture.runAsync(() -> {
                     try {
@@ -159,3 +154,4 @@ public class ChatSocket {
         }
     }
 }
+

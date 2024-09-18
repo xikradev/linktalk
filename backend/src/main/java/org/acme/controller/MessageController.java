@@ -19,10 +19,19 @@ public class MessageController {
     MessageBO messageBO;
 
     @GET
-    public Response getConversationMessages(@QueryParam("conversationId") Long conversationId){
+    @Path("/conversation/{conversationId}")
+    public Response getConversationMessages(@PathParam("conversationId") Long conversationId){
         List<MessageResponseDTO> response = messageBO.getConversationMessages(conversationId);
         return Response.ok(response).build();
     }
+
+    @GET
+    @Path("/group/{groupId}")
+    public Response getGroupMessages(@PathParam("groupId") Long groupId){
+        List<MessageResponseDTO> response = messageBO.getGroupMessages(groupId);
+        return Response.ok(response).build();
+    }
+
 
     @DELETE
     @Path("/{messageId}")

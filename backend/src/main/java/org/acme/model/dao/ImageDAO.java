@@ -26,13 +26,14 @@ public class ImageDAO {
     EntityManager em;
 
     @Transactional
-    public String saveImage(String base64Image, Long conversationId, Long senderId, Message message) throws FileNotFoundException {
+    public String saveImage(String base64Image, Long chatId, Long senderId, Message message, String typeChat) throws FileNotFoundException {
         byte[] imageBytes = Base64.getDecoder().decode(base64Image);
 
         String jpql = "SELECT COUNT(i) FROM Image i";
         Long count = em.createQuery(jpql, Long.class).getSingleResult();
 
-        String fileName = conversationId + "_" + senderId + "_image_" + count + ".png";
+
+        String fileName = chatId+"_"+typeChat + "_" + senderId + "_image_" + count + ".png";
         File file = new File("opt/app/images", fileName);
         String imageUrl = "http://localhost:8081/images/" + fileName;
 

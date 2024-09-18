@@ -6,7 +6,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
+import jakarta.ws.rs.NotFoundException;
 import org.acme.model.dto.UserContactDTO;
+import org.acme.model.entity.Group;
 import org.acme.model.entity.User;
 
 import java.util.List;
@@ -60,5 +62,21 @@ public class UserDAO {
 
     public void persist(User user) {
         entityManager.persist(user);
+    }
+
+    public List<Group> getUserGroups(Long userId){
+        User user = entityManager.find(User.class, userId);
+        if(user == null){
+            throw new NotFoundException("Não foi possível encontrar um usuário com esse id: "+userId);
+        }
+        return user.getGroups();
+    }
+
+    public boolean isAdmin(Long userId, Long groupId){
+        return entityManager.createQuery(
+                        "SELECT COUNT(ga) FROM GroupAdmin ga WHERE ga.group.id = :groupId AND ga.user.id = :userId", Long.class)
+                .setParameter("groupId", groupId)
+                .setParameter("userId", userId)
+                .getSingleResult() > 0;
     }
 }
