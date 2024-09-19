@@ -43,25 +43,4 @@ public class ImageController {
 
         return Response.status(Response.Status.NOT_FOUND).build();
     }
-
-    @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response uploadFile(@MultipartForm ImageUploadFormDTO form) {
-        File file = new File("opt/app/images", form.fileName);
-
-        try (InputStream inputStream = form.fileInputStream;
-             FileOutputStream outputStream = new FileOutputStream(file)) {
-
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-
-            return Response.ok("File uploaded successfully").build();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("File upload failed").build();
-        }
-    }
 }

@@ -11,6 +11,8 @@ import ArrowEditIcon from '/img/seta-edit.png';
 import imageIcon from '/img/imageIcon.png';
 import LinkTalk from '/img/linktalk.png';
 import DeleteMessageModal from './modals/deleteMessageModal';
+import apiLinkTalk from '../api/api.js';
+
 
 const ChatRoom = () => {
     const navigate = useNavigate();
@@ -140,13 +142,13 @@ const ChatRoom = () => {
 
     const getMessagesByConversation = async (conversationId) => {
         console.log(conversationId)
-        const response = await axios.get(`http://localhost:8081/message/conversation/${conversationId}`)
+        const response = await apiLinkTalk.get(`/message/conversation/${conversationId}`)
         console.log(response.data);
         setPublicChat([...response.data]);
     }
 
     const getMessagesByGroup = async (groupId) => {
-        const response = await axios.get(`http://localhost:8081/message/group/${groupId}`)
+        const response = await apiLinkTalk.get(`/message/group/${groupId}`)
         console.log(response.data);
         setPublicChat([...response.data]);
     }
@@ -202,19 +204,19 @@ const ChatRoom = () => {
 
     //Adicionar novo contato e iniciar conversa
     const startConversation = async (user2Id) => {
-        const result = await axios.post(`http://localhost:8081/conversation?user1Id=${userData.id}&user2Id=${user2Id}`);
+        const result = await apiLinkTalk.post(`/conversation?user1Id=${userData.id}&user2Id=${user2Id}`);
         console.log(result.data);
         getConversations();
     }
 
     const getConversations = async () => {
-        const result = await axios.get(`http://localhost:8081/user/contactsByUserId/${userData.id}`);
+        const result = await apiLinkTalk.get(`/user/contactsByUserId/${userData.id}`);
         console.log(result.data);
         setContacts([...result.data]);
     }
 
     const getGroups = async () => {
-        const result = await axios.get(`http://localhost:8081/user/${userData.id}/groups`);
+        const result = await apiLinkTalk.get(`/user/${userData.id}/groups`);
         console.log(result.data);
         setGroups([...result.data]);
     }
@@ -452,7 +454,7 @@ const ChatRoom = () => {
                 )}
                 {/* </div> */}
                 {openDeleteMessageModal && <DeleteMessageModal setModalOpen={(e) => setOpenDeleteMessageModal(e)} messageId={selectedMessageId} refreshMessages={async () => {
-                    const response = await axios.get(`http://localhost:8081/message/${isContactList ? 'conversation' : 'group'}/${isContactList ? selectedContact.conversationId : selectedGroup.id}`)
+                    const response = await apiLinkTalk.get(`/message/${isContactList ? 'conversation' : 'group'}/${isContactList ? selectedContact.conversationId : selectedGroup.id}`)
                     setPublicChat(response.data);
                 }} />}
             </div >

@@ -1,5 +1,6 @@
 package org.acme.exception.mapper;
 
+import io.quarkus.security.UnauthorizedException;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
@@ -27,6 +28,12 @@ public class CustomExceptionMapper implements ExceptionMapper<Throwable> {
 
         if (exception instanceof BadRequestException) {
             return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new CustomExceptionMessage(exception.getMessage()))
+                    .build();
+        }
+
+        if(exception instanceof SecurityException){
+            return Response.status(Response.Status.UNAUTHORIZED)
                     .entity(new CustomExceptionMessage(exception.getMessage()))
                     .build();
         }

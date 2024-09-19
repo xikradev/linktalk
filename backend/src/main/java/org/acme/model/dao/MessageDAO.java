@@ -55,7 +55,4 @@ public class MessageDAO {
         em.remove(em.contains(message) ? message : em.merge(message));
     }
 
-    public void update(Message message) {
-        em.merge(message); 
-    }
 }

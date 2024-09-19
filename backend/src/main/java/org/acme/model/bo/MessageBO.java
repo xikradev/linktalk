@@ -127,14 +127,4 @@ public class MessageBO {
         messageDAO.saveMessage(message);
         return message;
     }
-    @Transactional
-    public void updateMessageContent(Long messageId, String newContent) {
-        Message message = messageDAO.findById(messageId);
-        if (message != null) {
-            message.setContent(newContent); // Atualizando o conteúdo da mensagem
-            messageDAO.update(message);     // Salvando a mensagem com o novo conteúdo
-        } else {
-            throw new NotFoundException("Mensagem com ID " + messageId + " não encontrada.");
-        }
-    }
 }

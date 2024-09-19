@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import axios from "axios";
+import apiLinkTalk from "../../api/api";
 
 
 const DeleteMessageModal = ({ setModalOpen, messageId, refreshMessages }) => {
@@ -26,7 +27,7 @@ const DeleteMessageModal = ({ setModalOpen, messageId, refreshMessages }) => {
                     <button
                         onClick={() => {
                             setModalOpen(false);
-                            axios.delete(`http://localhost:8081/message/${messageId}`).then(() => {
+                            apiLinkTalk.delete(`/message/${messageId}`).then(() => {
                                 refreshMessages();
                             })
 
