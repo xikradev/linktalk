@@ -10,8 +10,10 @@ import store from '../redux/store';
 import ArrowEditIcon from '/img/seta-edit.png';
 import imageIcon from '/img/imageIcon.png';
 import LinkTalk from '/img/linktalk.png';
+import GroupAdd from '/img/groupAdd.png';
 import DeleteMessageModal from './modals/deleteMessageModal';
 import apiLinkTalk from '../api/api.js';
+import CreateGroupModal from './modals/createGroupModal.jsx';
 
 
 const ChatRoom = () => {
@@ -30,6 +32,9 @@ const ChatRoom = () => {
     const [imagePreview, setImagePreview] = useState(null);
     const [isContactList, setIsContactList] = useState(true);
     const [groups, setGroups] = useState([]);
+    const [foundedUser, setFoundedUser] = useState(null);
+    const [notFoundedUser, setNotFoundedUser] = useState(false);
+    const [isOpenGroupAdd, setIsOpenGroupAdd] = useState(false);
     // modal de pesquisa de usuário
     const [isModalOpen, setModalOpen] = useState(false);
     const [email, setEmail] = useState("");
@@ -178,9 +183,12 @@ const ChatRoom = () => {
         }));
     };
 
-    const searchUser = () => {
-        console.log(`Buscando usuário com o email: ${email}`);
-        closeModal(); // Fecha o modal após a pesquisa
+    const searchUser = async (searchEmail) => {
+        const response = await apiLinkTalk.get(`/user/email/${searchEmail}`)
+            .then((res) => { setFoundedUser(res.data); setNotFoundedUser(false) })
+            .catch(() => setNotFoundedUser(true));
+        console.log(response)
+        setFoundedUser(response.data)
     };
 
     useEffect(() => {
@@ -207,6 +215,12 @@ const ChatRoom = () => {
         const result = await apiLinkTalk.post(`/conversation?user1Id=${userData.id}&user2Id=${user2Id}`);
         console.log(result.data);
         getConversations();
+    }
+
+    const createGroup = async (userIds, groupName) => {
+        const queryString = userIds.map(id => `userIds=${id}`).join('&')
+        const result = await apiLinkTalk.post(`/group?${queryString}`, { name: groupName });
+        getGroups();
     }
 
     const getConversations = async () => {
@@ -248,14 +262,21 @@ const ChatRoom = () => {
             <div className='container'>
                 {/* <div className="chat-box"> */}
                 <div className="member-list">
-                    <div>
-                        <button
-                            className="send-button"
-                            onClick={() => setModalOpen(true)}
-                            style={{ marginLeft: '60%' }}
-                        >
-                            <img src={newChatIcon} alt='newChatIcon' style={{ "textAlign": "center", width: "20px" }} />
-                        </button>
+                    <div style={{ display: "flex", flexDirection: "row", justifyContent: "end" }}>
+                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "end" }}>
+                            <button
+                                className="send-button"
+                                onClick={() => setModalOpen(true)}
+                            >
+                                <img src={newChatIcon} alt='newChatIcon' style={{ "textAlign": "center", width: "20px" }} />
+                            </button>
+                            <button
+                                className="send-button"
+                                onClick={() => setIsOpenGroupAdd(true)}
+                            >
+                                <img src={GroupAdd} alt='newChatIcon' style={{ "textAlign": "center", width: "30px" }} />
+                            </button>
+                        </div>
                     </div>
                     <div style={{ "display": "flex", "alignItems": "center", justifyContent: "space-around" }}>
                         {/*Abrir a modal para adicionar um novo usuário a lista de contatos*/}
@@ -334,7 +355,7 @@ const ChatRoom = () => {
 
                                                 {/* Conteúdo da mensagem */}
                                                 <div className="message-data">
-                                                    {chat?.imgUrl !== null && <img src={chat.imgUrl}></img>}
+                                                    {chat?.imgUrl !== undefined && <img style={chat?.imgUrl !== undefined ? { border: "1px solid gray", borderRadius: "5px" } : null} src={chat.imgUrl}></img>}
                                                     <span>{chat.content}</span>
                                                 </div>
 
@@ -417,34 +438,49 @@ const ChatRoom = () => {
                                 placeholder="Digite o email do usuário"
                                 value={email}
                                 onChange={(e) => {
+                                    setFoundedUser(null)
+                                    setNotFoundedUser(false);
                                     const filteredEmail = e.target.value.toLowerCase();
                                     setEmail(filteredEmail);
                                 }}
                             />
-                            <button className="send-button" onClick={() => searchUser}>
+                            <button className="send-button" onClick={() => searchUser(email)}>
                                 <img src={serchIcon} alt='serchIcon' style={{ "textAlign": "center" }} />
                             </button>
+
+                            {foundedUser && (<div style={{
+                                "display": "flex", "alignItems": "center", "padding": "12px", border: "1px solid black", marginTop: "10px", borderRadius: "5px"
+                            }}>
+                                <img src={userIcon} style={{ marginRight: '10px' }
+                                } />
+                                {foundedUser.fullName}
+                            </div>)}
+                            {foundedUser === null && notFoundedUser && (
+                                <div style={{ color: "red" }}>Não foi possível encontrar nenhum usuário com esse email</div>
+                            )}
 
                             <div className="modal-buttons">
                                 {/* Botão de Cancelar */}
                                 <button
                                     onClick={() => {
+                                        setFoundedUser(null);
                                         setModalOpen(false);
                                         //closeModal
                                     }}
-                                    style={{ padding: '10px 20px', marginRight: '10px', backgroundColor: 'red', color: '#fff', border: 'none', borderRadius: '5px' }}
+                                    style={{ cursor: 'pointer', padding: '10px 20px', marginRight: '10px', backgroundColor: 'red', color: '#fff', border: 'none', borderRadius: '5px' }}
                                 >
                                     Cancelar
                                 </button>
 
                                 {/* Botão de Adicionar */}
                                 <button
+                                    disabled={foundedUser === null}
                                     onClick={() => {
                                         //addUser
-                                        startConversation(userData.conversationId);
+                                        startConversation(foundedUser.id);
                                         setModalOpen(false);
                                     }}
-                                    style={{ padding: '10px 20px', backgroundColor: 'green', color: '#fff', border: 'none', borderRadius: '5px' }}
+                                    style={{ padding: '10px 20px', backgroundColor: 'green', color: '#fff', border: 'none', cursor: "pointer", borderRadius: '5px', opacity: foundedUser ? 1 : 0.5 }}
                                 >
                                     Adicionar
                                 </button>
@@ -457,6 +493,7 @@ const ChatRoom = () => {
                     const response = await apiLinkTalk.get(`/message/${isContactList ? 'conversation' : 'group'}/${isContactList ? selectedContact.conversationId : selectedGroup.id}`)
                     setPublicChat(response.data);
                 }} />}
+                {isOpenGroupAdd && <CreateGroupModal contacts={contacts} setOpenModal={(e) => setIsOpenGroupAdd(e)} createGroup={createGroup} />}
             </div >
         </>
     );

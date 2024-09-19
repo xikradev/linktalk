@@ -40,7 +40,7 @@ public class GroupController {
             auditLogBO.logToDatabase("CREATE_GROUP_REQUEST_FAILED_NOT_FOUND_USERS_IDS", emailToken, LocalDateTime.now(),GroupController.class);
             throw new BadRequestException("é preciso informar pelo menos id de um usuário para criar o grupo");
         }
-        GroupResponseDTO response = groupBO.createGroup(userIds,groupRequestDTO);
+        GroupResponseDTO response = groupBO.createGroup(userIds,groupRequestDTO, emailToken);
         UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder().path(Long.toString(response.getId()));
         auditLogBO.logToDatabase("CREATE_GROUP_REQUEST_SUCCESS", emailToken, LocalDateTime.now(),GroupController.class);
         return Response.created(uriBuilder.build()).build();
