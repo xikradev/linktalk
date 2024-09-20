@@ -47,6 +47,15 @@ public class UserController {
         return Response.ok().build();
     }
 
+    @GET
+    @Path("/verify-email/{email}")
+    public Response verifyEmail(@PathParam("email") String email){
+        auditLogBO.logToDatabase("VERIFY_EMAIL_REQUEST", email, LocalDateTime.now(),UserController.class);
+        boolean isExist = userBO.verifyEmail(email);
+        auditLogBO.logToDatabase("VERIFY_EMAIL_REQUEST_SUCCESS", email, LocalDateTime.now(),UserController.class);
+        return Response.ok(isExist).build();
+    }
+
     @POST
     @Path("/login")
     public Response login(UserLoginRequestDTO userLoginRequestDTO){

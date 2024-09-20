@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.List;
 
 @ApplicationScoped
 public class ImageDAO {
@@ -58,6 +59,16 @@ public class ImageDAO {
         query.setParameter("message", message);
         return query.getResultStream().findFirst().orElse(null);
     }
+    @Transactional
+    public List<Image> getImagesByConversation(Long conversationId) {
+        return em.createQuery(
+                        "SELECT i FROM Image i " +
+                                "JOIN i.message m " +
+                                "JOIN m.conversation c " +
+                                "WHERE c.id = :conversationId", Image.class)
+                .setParameter("conversationId", conversationId)
+                .getResultList();
+    }
 
     public void delete(Image image) {
 
@@ -74,5 +85,15 @@ public class ImageDAO {
         }
 
         em.remove(em.contains(image) ? image : em.merge(image));
+    }
+
+    public List<Image> getImagesByGroup(Long groupId) {
+        return em.createQuery(
+                        "SELECT i FROM Image i " +
+                                "JOIN i.message m " +
+                                "JOIN m.group g " +
+                                "WHERE g.id = :groupId", Image.class)
+                .setParameter("groupId", groupId)
+                .getResultList();
     }
 }

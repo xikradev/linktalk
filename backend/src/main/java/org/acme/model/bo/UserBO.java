@@ -110,4 +110,9 @@ public class UserBO {
         }
         return groupResponseDTOS;
     }
+    @Transactional
+    public boolean verifyEmail(String email) {
+        User user = userDAO.findByEmail(email);
+        return user != null;
+    }
 }

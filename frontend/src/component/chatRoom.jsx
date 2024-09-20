@@ -8,12 +8,19 @@ import userIcon from '/img/user.png';
 import logoutIcon from '/img/logout.png';
 import store from '../redux/store';
 import ArrowEditIcon from '/img/seta-edit.png';
+import ConfigIcon from '/img/config.png';
 import imageIcon from '/img/imageIcon.png';
 import LinkTalk from '/img/linktalk.png';
 import GroupAdd from '/img/groupAdd.png';
 import DeleteMessageModal from './modals/deleteMessageModal';
 import apiLinkTalk from '../api/api.js';
 import CreateGroupModal from './modals/createGroupModal.jsx';
+import DeleteConversationModal from './modals/deleteConversationModal.jsx';
+import ExitGroupModal from './modals/exitGroupModal.jsx';
+import AddUserGroupModal from './modals/addUserGroupModal.jsx';
+import RemoveUserGroups from './modals/removeUserGroups.jsx';
+import EditNameGroupModel from './modals/editNameGroupModel.jsx';
+import DeleteGroupModal from './modals/deleteGroupModal.jsx';
 
 
 const ChatRoom = () => {
@@ -25,6 +32,7 @@ const ChatRoom = () => {
     const [socket, setSocket] = useState(null);
     const [tab, setTab] = useState("CHATS");
     const scrollContainerRef = useRef();
+    const [isOpenDeleteConversationModal, setIsOpenDeleteConversationModal] = useState(false);
     const [openEditMessage, setOpenEditMessage] = useState(null);
     const [openDeleteMessageModal, setOpenDeleteMessageModal] = useState(false);
     const [selectedMessageId, setSelectedMessageId] = useState(null);
@@ -32,9 +40,17 @@ const ChatRoom = () => {
     const [imagePreview, setImagePreview] = useState(null);
     const [isContactList, setIsContactList] = useState(true);
     const [groups, setGroups] = useState([]);
+    const [configContact, setConfigContact] = useState(null);
     const [foundedUser, setFoundedUser] = useState(null);
     const [notFoundedUser, setNotFoundedUser] = useState(false);
     const [isOpenGroupAdd, setIsOpenGroupAdd] = useState(false);
+    const [selectedConversation, setSelectedConversation] = useState(null);
+    const [configGroup, setConfigGroup] = useState(null);
+    const [isOpenExitGroup, setIsOpenExitGroup] = useState(false);
+    const [isOpenAddUSerGroup, setIsOpenAddUSerGroup] = useState(false);
+    const [isOpenRemoveUSerGroup, setIsOpenRemoveUSerGroup] = useState(false);
+    const [isOpenEditGroupName, setIsOpenEditGroupName] = useState(false);
+    const [isOpenDeleteGroup, setIsOpeDeleteGroup] = useState(false);
     // modal de pesquisa de usuário
     const [isModalOpen, setModalOpen] = useState(false);
     const [email, setEmail] = useState("");
@@ -68,7 +84,7 @@ const ChatRoom = () => {
         setTimeout(() => {
             scrollToBottom();
         }, 150) // Garantir que o scroll esteja no final ao montar o componente
-    }, [selectedContact]);
+    }, [selectedContact, selectedGroup]);
 
     useEffect(() => {
         const user = JSON.parse(sessionStorage.getItem("user"));
@@ -161,7 +177,7 @@ const ChatRoom = () => {
 
     const sendMessage = () => {
         console.log(userData);
-        if (socket && userData.message.trim()) {
+        if (socket && (userData.message.trim() || selectedImage)) {
             const newMessage = {
                 senderEmail: userData.email,
                 senderName: userData.username,
@@ -196,6 +212,13 @@ const ChatRoom = () => {
         const handleClick = () => {
             if (openEditMessage !== null) {
                 setOpenEditMessage(null)
+
+            }
+            if (configContact !== null) {
+                setConfigContact(null)
+            }
+            if (configGroup !== null) {
+                setConfigGroup(null)
             }
             // Alterna o estado a cada clique
         };
@@ -207,7 +230,7 @@ const ChatRoom = () => {
         return () => {
             document.removeEventListener('click', handleClick);
         };
-    }, [openEditMessage]); // [] garante que o evento será adicionado apenas uma vez, na montagem do componente
+    }, [openEditMessage, configContact, configGroup]); // [] garante que o evento será adicionado apenas uma vez, na montagem do componente
 
 
     //Adicionar novo contato e iniciar conversa
@@ -292,13 +315,23 @@ const ChatRoom = () => {
                                     <li key={index}
                                         onClick={() => {
                                             getMessagesByConversation(contact.conversationId);
-                                            setTab(contact.fullName)
+                                            setTab(contact.email)
                                             setSelectedContact(contact);
                                         }}
-                                        className={`member ${tab === contact.fullName && "active"}`} >
-                                        <div style={{ "display": "flex", "alignItems": "center" }}>
-                                            <img src={userIcon} style={{ marginRight: '10px' }} />
-                                            {contact.fullName}
+                                        className={`member ${tab === contact.email && "active"}`} >
+                                        <div style={{ "display": "flex", "alignItems": "center", justifyContent: "space-between", position: "relative" }}>
+                                            <div style={{ "display": "flex", "alignItems": "center" }}>
+                                                <img src={userIcon} style={{ marginRight: '10px' }} />
+                                                {contact.fullName}
+                                            </div>
+                                            {configContact === contact.id && (<div className='edit-contact' style={{
+                                                position: 'absolute', width: 'auto', background: '#f0f0f0', right: 2, top: -30, backgroundColor: '#FFF',
+                                                color: 'black',
+                                                boxShadow: '0 3px 10px rgb(0 0 0 / 0.2)'
+                                            }}>
+                                                <p style={{ margin: '0px', textAlign: 'center', padding: '6px 12px', cursor: 'pointer' }} onClick={() => { setSelectedConversation(contact.conversationId); setIsOpenDeleteConversationModal(true); }}>Remover Conversa</p>
+                                            </div>)}
+                                            <img src={ConfigIcon} style={{ marginLeft: '10px', width: "25px" }} onClick={() => setConfigContact(contact.id)} />
                                         </div>
                                     </li>
                                 );
@@ -310,13 +343,32 @@ const ChatRoom = () => {
                                         <li key={index}
                                             onClick={() => {
                                                 getMessagesByGroup(group.id)
-                                                setTab(group.name)
+                                                setTab(group.id)
                                                 setSelectedGroup(group)
                                             }}
-                                            className={`member ${tab === group.name && "active"}`} >
-                                            <div style={{ "display": "flex", "alignItems": "center" }}>
-                                                <img src={userIcon} style={{ marginRight: '10px' }} />
-                                                {group.name}
+                                            className={`member ${tab === group.id && "active"}`} >
+                                            <div style={{ "display": "flex", "alignItems": "center", justifyContent: "space-between", position: "relative" }}>
+                                                <div style={{ "display": "flex", "alignItems": "center" }}>
+                                                    <img src={userIcon} style={{ marginRight: '10px' }} />
+                                                    {group.name}
+                                                </div>
+                                                {configGroup === group.id && (<div className='edit-contact' style={{
+                                                    position: 'absolute', width: 'auto', background: '#f0f0f0', zIndex: "5", right: 2, top: -30, backgroundColor: '#FFF',
+                                                    color: 'black',
+                                                    boxShadow: '0 3px 10px rgb(0 0 0 / 0.2)'
+                                                }}>
+                                                    {group.admin ?
+                                                        <>
+                                                            <p style={{ margin: '0px', textAlign: 'center', padding: '6px 12px', cursor: 'pointer' }} onClick={() => setIsOpenAddUSerGroup(true)}>Adicionar pessoas</p>
+                                                            <p style={{ margin: '0px', textAlign: 'center', padding: '6px 12px', cursor: 'pointer' }} onClick={() => setIsOpenRemoveUSerGroup(true)}>Remover pessoas</p>
+                                                            <p style={{ margin: '0px', textAlign: 'center', padding: '6px 12px', cursor: 'pointer' }} onClick={() => { setIsOpenEditGroupName(true) }}>Editar Nome</p>
+                                                            <p style={{ margin: '0px', textAlign: 'center', padding: '6px 12px', cursor: 'pointer' }} onClick={() => { setIsOpeDeleteGroup(true) }}><span style={{ color: "red" }}>Apagar grupo</span></p>
+
+                                                        </>
+                                                        :
+                                                        <p style={{ margin: '0px', textAlign: 'center', padding: '6px 12px', cursor: 'pointer' }} onClick={() => { setIsOpenExitGroup(true) }}>Sair do Grupo</p>}
+                                                </div>)}
+                                                <img src={ConfigIcon} style={{ marginLeft: '10px', width: "25px" }} onClick={() => setConfigGroup(group.id)} />
                                             </div>
                                         </li>
                                     );
@@ -355,7 +407,7 @@ const ChatRoom = () => {
 
                                                 {/* Conteúdo da mensagem */}
                                                 <div className="message-data">
-                                                    {chat?.imgUrl !== undefined && <img style={chat?.imgUrl !== undefined ? { border: "1px solid gray", borderRadius: "5px" } : null} src={chat.imgUrl}></img>}
+                                                    {(chat?.imgUrl !== undefined) ? <img style={chat?.imgUrl !== undefined ? { border: "1px solid gray", borderRadius: "5px" } : { border: 'none', borderRadius: "0px" }} src={chat.imgUrl}></img> : null}
                                                     <span>{chat.content}</span>
                                                 </div>
 
@@ -371,7 +423,7 @@ const ChatRoom = () => {
                                                             }
                                                         }} />
                                                         {openEditMessage === index && <div className='edit-message' style={{
-                                                            position: 'absolute', width: 'auto', background: 'green', right: 2, top: -50, backgroundColor: '#FFF',
+                                                            position: 'absolute', width: 'auto', background: 'green', right: 2, top: -20, backgroundColor: '#FFF',
                                                             color: 'black',
                                                             boxShadow: '0 3px 10px rgb(0 0 0 / 0.2)'
                                                         }}>
@@ -492,6 +544,37 @@ const ChatRoom = () => {
                 {openDeleteMessageModal && <DeleteMessageModal setModalOpen={(e) => setOpenDeleteMessageModal(e)} messageId={selectedMessageId} refreshMessages={async () => {
                     const response = await apiLinkTalk.get(`/message/${isContactList ? 'conversation' : 'group'}/${isContactList ? selectedContact.conversationId : selectedGroup.id}`)
                     setPublicChat(response.data);
+                }} />}
+
+                {isOpenDeleteConversationModal && <DeleteConversationModal setModalOpen={(e) => setIsOpenDeleteConversationModal(e)} conversationId={selectedConversation} refreshMessages={async () => {
+                    getConversations();
+                    setSelectedContact(null);
+                }} />}
+
+                {isOpenExitGroup && <ExitGroupModal setModalOpen={(e) => setIsOpenExitGroup(e)} groupId={selectedGroup.id} userId={userData.id} refreshMessages={async () => {
+                    getGroups();
+                    setSelectedGroup(null);
+                }} />}
+                {isOpenAddUSerGroup && <AddUserGroupModal contacts={contacts} groupId={selectedGroup?.id} setOpenModal={(e) => setIsOpenAddUSerGroup(e)} addUser={async (memberList, groupId) => {
+                    const queryString = memberList.map(id => `userIds=${id}`).join('&')
+                    await apiLinkTalk.put(`/group/${groupId}/add-user?${queryString}`);
+                    getGroups();
+                }} />}
+                {isOpenRemoveUSerGroup && <RemoveUserGroups groupId={selectedGroup?.id} userId={userData.id} setOpenModal={(e) => setIsOpenRemoveUSerGroup(e)} removeUser={async (memberList, groupId) => {
+                    const queryString = memberList.map(id => `userIds=${id}`).join('&')
+                    await apiLinkTalk.put(`/group/${groupId}/remove-user?${queryString}`);
+                    getGroups();
+                }} />}
+                {isOpenEditGroupName && <EditNameGroupModel groupId={selectedGroup?.id} setOpenModal={(e) => { setIsOpenEditGroupName(e) }} originalName={selectedGroup?.name} updateName={async (groupName, groupId) => {
+                    await apiLinkTalk.put(`/group/${groupId}/updateName`, {
+                        name: groupName
+                    });
+                    getGroups();
+                    setTab(selectedGroup.id)
+                }} />}
+                {isOpenDeleteGroup && <DeleteGroupModal groupId={selectedGroup?.id} setModalOpen={(e) => { setIsOpeDeleteGroup(e) }} refreshMessages={() => {
+                    getGroups();
+                    setSelectedGroup(null);
                 }} />}
                 {isOpenGroupAdd && <CreateGroupModal contacts={contacts} setOpenModal={(e) => setIsOpenGroupAdd(e)} createGroup={createGroup} />}
             </div >

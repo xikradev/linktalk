@@ -38,4 +38,20 @@ public class ConversationController {
         auditLogBO.logToDatabase("START_CONVERSATION_REQUEST_SUCCESS", emailToken, LocalDateTime.now(), ConversationController.class);
         return Response.created(uriBuilder.build()).build();
     }
+
+    @DELETE
+    @Path("/{conversationId}")
+    public Response removeConversation(@HeaderParam("Authorization") String token, @PathParam("conversationId") Long conversationId){
+        String emailToken = jwtValidateBO.validateToken(token);
+        auditLogBO.logToDatabase("REMOVE_CONVERSATION_REQUEST", emailToken, LocalDateTime.now(), ConversationController.class);
+        try {
+            conversationBO.deleteConversationById(conversationId);
+            auditLogBO.logToDatabase("REMOVE_CONVERSATION_REQUEST_SUCCESS", emailToken, LocalDateTime.now(), ConversationController.class);
+            return Response.ok("Conversa deletada com sucesso").build();
+        }catch (Exception e){
+            auditLogBO.logToDatabase("REMOVE_CONVERSATION_REQUEST_FAILED_NOT_FOUND_CONVERSATION", emailToken, LocalDateTime.now(), ConversationController.class);
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        }
+    }
+
 }

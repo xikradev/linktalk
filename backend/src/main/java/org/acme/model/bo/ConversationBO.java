@@ -6,12 +6,15 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import org.acme.controller.ConversationController;
 import org.acme.model.dao.ConversationDAO;
+import org.acme.model.dao.ImageDAO;
 import org.acme.model.dao.MessageDAO;
 import org.acme.model.dao.UserDAO;
 import org.acme.model.entity.Conversation;
+import org.acme.model.entity.Image;
 import org.acme.model.entity.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @ApplicationScoped
 public class ConversationBO {
@@ -20,9 +23,25 @@ public class ConversationBO {
     ConversationDAO conversationDAO;
     @Inject
     UserDAO userDAO;
+    @Inject
+    ImageDAO imageDAO;
 
     @Inject
     AuditLogBO auditLogBO;
+    @Transactional
+    public void deleteConversationById(Long conversationId) {
+        Conversation conversation = conversationDAO.findById(conversationId);
+        if(conversation != null){
+            List<Image> images = imageDAO.getImagesByConversation(conversationId);
+            for(Image image : images){
+                imageDAO.delete(image);
+            }
+            conversationDAO.delete(conversation);
+        }else {
+            throw new NotFoundException("Conversa com ID " + conversationId + " não encontrada.");
+        }
+    }
+
     @Transactional
     public Conversation startConversation(Long user1Id, Long user2Id, String emailToken) {
         User user1 = userDAO.findById(user1Id);

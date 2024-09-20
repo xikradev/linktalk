@@ -142,7 +142,9 @@ public class ChatSocket {
         jsonObject.put("id", messageId);
         jsonObject.put("senderEmail", senderEmail);
         jsonObject.put("content", content);
-        jsonObject.put("imgUrl", imgUrl);
+        if(imgUrl != null){
+            jsonObject.put("imgUrl", imgUrl);
+        }
         jsonObject.put("timeSented", timeSented);
         return jsonObject.toString();
     }

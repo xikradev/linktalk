@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import org.acme.model.entity.Conversation;
+import org.acme.model.entity.Message;
 import org.acme.model.entity.User;
 
 @ApplicationScoped
@@ -36,5 +37,9 @@ public class ConversationDAO {
         TypedQuery<Conversation> query =em.createQuery("SELECT c FROM Conversation c WHERE c.id = :id",Conversation.class);
         query.setParameter("id", id);
         return query.getResultStream().findFirst().orElse(null);
+    }
+
+    public void delete(Conversation conversation) {
+        em.remove(em.contains(conversation) ? conversation : em.merge(conversation));
     }
 }

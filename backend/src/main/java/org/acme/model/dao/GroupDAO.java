@@ -40,4 +40,28 @@ public class GroupDAO {
     public Group findById(Long id){
         return em.find(Group.class, id);
     }
+
+    public void delete(Group group) {
+        em.remove(em.contains(group) ? group : em.merge(group));
+    }
+
+    public void update(Group group){
+        em.merge(group);
+    }
+
+    public void addUserToGroup(Group group, User user) {
+        group.getMembers().add(user);
+        em.merge(group);
+    }
+
+    public void removeUserFromGroup(Group group, User user) {
+        if (group != null && user != null) {
+            group.getMembers().remove(user);
+            em.merge(group);
+        }
+    }
+
+    public List<User> getGroupMembers(Group group) {
+        return group.getMembers();
+    }
 }

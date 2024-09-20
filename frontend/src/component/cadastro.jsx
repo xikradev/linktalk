@@ -19,18 +19,24 @@ const Cadastro = () => {
 
     const registerUser = async () => {
         try {
-            const response = await axios.post("http://localhost:8081/user/register", {
-                fullName: userData.username,
-                email: userData.email,
-                password: userData.password
-            });
+            const emailExist = await axios.get("http://localhost:8081/user/verify-email/" + userData.email);
 
-            console.log("Registration response:", response.data);
-            alert("Registration successful!");
-            const data = response.data;
-            setTimeout(() => {
-                navigate('/login');
-            }, 150);
+            if (emailExist.data) {
+                alert("Já existe uma conta conta com esse email");
+            } else {
+                const response = await axios.post("http://localhost:8081/user/register", {
+                    fullName: userData.username,
+                    email: userData.email,
+                    password: userData.password
+                });
+
+                console.log("Registration response:", response.data);
+                alert("Registration successful!");
+                const data = response.data;
+                setTimeout(() => {
+                    navigate('/login');
+                }, 150);
+            }
         } catch (error) {
             console.error("Registration failed:", error);
             alert("Failed to register. Please check your details and try again.");

@@ -48,11 +48,15 @@ public class MessageController {
 
     @DELETE
     @Path("/{messageId}")
-    public Response deleteMessageById(@PathParam("messageId") Long messageId){
+    public Response deleteMessageById(@HeaderParam("Authorization") String token,@PathParam("messageId") Long messageId){
+        String emailToken = jwtValidateBO.validateToken(token);
+        auditLogBO.logToDatabase("DELETE_MESSAGE_REQUEST", emailToken, LocalDateTime.now(),MessageController.class);
         try {
             messageBO.deleteMessageById(messageId);
+            auditLogBO.logToDatabase("DELETE_MESSAGE_REQUEST_SUCCESS", emailToken, LocalDateTime.now(),MessageController.class);
             return Response.ok("Mensagem deletada com sucesso").build();
         } catch (IllegalArgumentException e) {
+            auditLogBO.logToDatabase("DELETE_MESSAGE_REQUEST_FAILED_NOT_FOUND_MESSAGE", emailToken, LocalDateTime.now(),MessageController.class);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         }
     }

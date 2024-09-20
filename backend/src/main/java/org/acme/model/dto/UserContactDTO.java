@@ -6,6 +6,9 @@ public class UserContactDTO {
     private String email;
     private Long conversationId;
 
+    public UserContactDTO() {
+    }
+
     public UserContactDTO(Long id, String fullName, String email, Long conversationId) {
         this.id = id;
         this.fullName = fullName;

@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
+import org.acme.controller.MessageController;
 import org.acme.model.dao.*;
 import org.acme.model.dto.MessageResponseDTO;
 import org.acme.model.entity.*;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -29,7 +31,7 @@ public class MessageBO {
     ImageDAO imageDAO;
 
     @Inject
-    AuditLogDAO auditLogDAO;
+    AuditLogBO auditLogBO;
 
     @Inject
     UserDAO userDAO;
@@ -98,8 +100,11 @@ public class MessageBO {
     @Transactional
     public Message sendMessage(Long conversationId, Long senderId, String senderEmail, Long currentTimeMillis,
                                String content) {
+        auditLogBO.logToDatabase("SEND_MESSAGE", senderEmail, LocalDateTime.now(), MessageBO.class);
+
         Conversation conversation = conversationDAO.findById(conversationId);
         User sender = userDAO.findById(senderId);
+
 
         Message message = new Message();
         message.setConversation(conversation);
@@ -115,6 +120,7 @@ public class MessageBO {
     @Transactional
     public Message sendMessageToGroup(Long groupId, Long senderId, String senderEmail, Long currentTimeMillis,
                                String content) {
+        auditLogBO.logToDatabase("SEND_MESSAGE", senderEmail, LocalDateTime.now(), MessageBO.class);
         Group group = groupDAO.findById(groupId);
         User sender = userDAO.findById(senderId);
 
