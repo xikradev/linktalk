@@ -25,7 +25,13 @@ const login = () => {
         setShowPassword(!showPassword); // Alterna entre mostrar e esconder a senha
     };
 
-
+     //capturar o evento da tela enter
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault(); 
+          registerUser();
+        }
+    };
 
     const registerUser = async () => {
         try {
@@ -45,7 +51,6 @@ const login = () => {
                 token: response.data.token,
             }))
 
-            console.log("Login response:", response.data);
 
             setTimeout(() => {
                 navigate('/chatRoom');
@@ -87,6 +92,7 @@ const login = () => {
                             style={{ marginTop: "10px" }}
                             placeholder='Senha'
                             value={userData.password}
+                            onKeyDown={handleKeyDown}
                             onChange={(e) => {
                                 setUserData((prevState) => ({
                                     ...prevState,

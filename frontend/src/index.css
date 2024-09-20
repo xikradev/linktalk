@@ -217,12 +217,7 @@ ul {
 }
 
 .send-button {
-  /* width: 8%; */
-  /* border-radius: 50px; */
   margin-left: 10px;
-  /* background-color: rgb(65, 2, 125); */
-  /* cursor: pointer; */
-
   background-color: transparent;
   border: none;
   outline: none;
@@ -251,15 +246,11 @@ ul {
 
 
 .avatar {
-  background-color: cornflowerblue;
   padding: 3px 5px;
   border-radius: 5px;
   color: #fff;
-  width: 40px;
   height: 40px;
   border-radius: 50%;
-
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -268,8 +259,8 @@ ul {
 }
 
 .avatar.self {
+  width: 10px;
   color: #000;
-  background-color: greenyellow;
 }
 
 .message {
@@ -294,11 +285,22 @@ ul {
   display: flex;
   position: relative;
   padding: 10px;
-  background-color: #FFF;
   border-radius: 5px;
   flex-direction: column;
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
   margin: 5px 10px;
+}
+
+.message-time {
+  display: flex;
+  margin-left: 100%;
+  justify-content: end;
+  font-size: 10px;
+}
+
+.message-time.self {
+  display: flex;
+  justify-content: end;
 }
 
 .arrow-edit {
@@ -306,14 +308,19 @@ ul {
   position: absolute;
   display: none;
   cursor: pointer;
+  background-color: transparent;
+  border: none;
+  border-color: transparent
 }
 
 .message-content:hover .arrow-edit {
   display: inline-block;
+  border: none;
 }
 
 .edit-message>p:hover {
   background: gray;
+  border-color: transparent;
 }
 
 .edit-contact>p:hover {

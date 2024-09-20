@@ -25,13 +25,14 @@ import DeleteGroupModal from './modals/deleteGroupModal.jsx';
 
 const ChatRoom = () => {
     const navigate = useNavigate();
+    const scrollContainerRef = useRef();
+
     const [publicChat, setPublicChat] = useState([]);
     const [contacts, setContacts] = useState([])
     const [selectedContact, setSelectedContact] = useState(null);
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [socket, setSocket] = useState(null);
     const [tab, setTab] = useState("CHATS");
-    const scrollContainerRef = useRef();
     const [isOpenDeleteConversationModal, setIsOpenDeleteConversationModal] = useState(false);
     const [openEditMessage, setOpenEditMessage] = useState(null);
     const [openDeleteMessageModal, setOpenDeleteMessageModal] = useState(false);
@@ -40,12 +41,14 @@ const ChatRoom = () => {
     const [imagePreview, setImagePreview] = useState(null);
     const [isContactList, setIsContactList] = useState(true);
     const [groups, setGroups] = useState([]);
+    const [isOpenGroup, setIsOpenGroup] = useState(false);
     const [configContact, setConfigContact] = useState(null);
     const [foundedUser, setFoundedUser] = useState(null);
     const [notFoundedUser, setNotFoundedUser] = useState(false);
     const [isOpenGroupAdd, setIsOpenGroupAdd] = useState(false);
     const [selectedConversation, setSelectedConversation] = useState(null);
     const [configGroup, setConfigGroup] = useState(null);
+
     const [isOpenExitGroup, setIsOpenExitGroup] = useState(false);
     const [isOpenAddUSerGroup, setIsOpenAddUSerGroup] = useState(false);
     const [isOpenRemoveUSerGroup, setIsOpenRemoveUSerGroup] = useState(false);
@@ -73,7 +76,6 @@ const ChatRoom = () => {
     }, [socket]);
 
     const scrollToBottom = () => {
-        console.log(scrollContainerRef.current)
         if (scrollContainerRef.current !== null) {
             console.log(scrollContainerRef.current?.scrollTop, scrollContainerRef.current?.scrollHeight)
             scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
@@ -89,7 +91,6 @@ const ChatRoom = () => {
     useEffect(() => {
         const user = JSON.parse(sessionStorage.getItem("user"));
 
-
         setUserData({
             id: user.id,
             username: user.fullName,
@@ -98,15 +99,10 @@ const ChatRoom = () => {
             connected: false,
             token: user.token
         })
-
-
-
     }, [])
 
     useEffect(() => {
-        console.log(selectedContact)
         if (selectedContact !== null || selectedGroup !== null) {
-            console.log(userData.token)
             const ws = new WebSocket(`ws://localhost:8081/${isContactList ? "conversation" : "group"}/${isContactList ? selectedContact?.conversationId : selectedGroup.id}/${userData.token}`);
             ws.onopen = () => {
                 setUserData((prevState) => ({
@@ -117,7 +113,6 @@ const ChatRoom = () => {
             };
 
             ws.onmessage = (event) => {
-                console.log(event)
                 const messageData = JSON.parse(event.data);
                 setPublicChat((prevChat) => [...prevChat, messageData]);
             };
@@ -133,9 +128,6 @@ const ChatRoom = () => {
             ws.onerror = (error) => {
                 console.error('WebSocket error:', error);
             };
-
-            console.log(ws)
-
             setSocket(ws);
         }
     }, [selectedContact, selectedGroup])
@@ -161,22 +153,26 @@ const ChatRoom = () => {
         console.log("User data in ChatRoom:", userData);
     }, [userData]);
 
+    //capturar o evento da tela enter
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault(); 
+          sendMessage();
+        }
+    };
+
     const getMessagesByConversation = async (conversationId) => {
-        console.log(conversationId)
         const response = await apiLinkTalk.get(`/message/conversation/${conversationId}`)
-        console.log(response.data);
         setPublicChat([...response.data]);
     }
 
     const getMessagesByGroup = async (groupId) => {
         const response = await apiLinkTalk.get(`/message/group/${groupId}`)
-        console.log(response.data);
         setPublicChat([...response.data]);
     }
 
 
     const sendMessage = () => {
-        console.log(userData);
         if (socket && (userData.message.trim() || selectedImage)) {
             const newMessage = {
                 senderEmail: userData.email,
@@ -203,7 +199,6 @@ const ChatRoom = () => {
         const response = await apiLinkTalk.get(`/user/email/${searchEmail}`)
             .then((res) => { setFoundedUser(res.data); setNotFoundedUser(false) })
             .catch(() => setNotFoundedUser(true));
-        console.log(response)
         setFoundedUser(response.data)
     };
 
@@ -236,10 +231,10 @@ const ChatRoom = () => {
     //Adicionar novo contato e iniciar conversa
     const startConversation = async (user2Id) => {
         const result = await apiLinkTalk.post(`/conversation?user1Id=${userData.id}&user2Id=${user2Id}`);
-        console.log(result.data);
         getConversations();
     }
 
+    //Criar novo grupo
     const createGroup = async (userIds, groupName) => {
         const queryString = userIds.map(id => `userIds=${id}`).join('&')
         const result = await apiLinkTalk.post(`/group?${queryString}`, { name: groupName });
@@ -248,23 +243,15 @@ const ChatRoom = () => {
 
     const getConversations = async () => {
         const result = await apiLinkTalk.get(`/user/contactsByUserId/${userData.id}`);
-        console.log(result.data);
         setContacts([...result.data]);
     }
 
     const getGroups = async () => {
         const result = await apiLinkTalk.get(`/user/${userData.id}/groups`);
-        console.log(result.data);
         setGroups([...result.data]);
     }
 
-
-    useEffect(() => {
-        console.log(publicChat)
-    }, [publicChat])
-
     const handleFileChange = (event) => {
-        console.log(event.target.value)
         const selectedFile = event.target.files[0];
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -286,28 +273,37 @@ const ChatRoom = () => {
                 {/* <div className="chat-box"> */}
                 <div className="member-list">
                     <div style={{ display: "flex", flexDirection: "row", justifyContent: "end" }}>
-                        <div style={{ display: "flex", flexDirection: "row", justifyContent: "end" }}>
+                            {/*Abrir modal de adicionar novo usuario*/}
                             <button
                                 className="send-button"
                                 onClick={() => setModalOpen(true)}
                             >
                                 <img src={newChatIcon} alt='newChatIcon' style={{ "textAlign": "center", width: "20px" }} />
                             </button>
+                            {/*Abrir modal de criar grupo*/}
                             <button
                                 className="send-button"
                                 onClick={() => setIsOpenGroupAdd(true)}
                             >
                                 <img src={GroupAdd} alt='newChatIcon' style={{ "textAlign": "center", width: "30px" }} />
                             </button>
-                        </div>
                     </div>
+                    {/*Alterar entre contatos e grupos*/}
                     <div style={{ "display": "flex", "alignItems": "center", justifyContent: "space-around" }}>
-                        {/*Abrir a modal para adicionar um novo usuário a lista de contatos*/}
-                        <label style={{ cursor: "pointer", borderBottom: isContactList && "2px solid purple" }} onClick={() => setIsContactList(true)}>Conversas</label>
-                        <label style={{ cursor: "pointer", borderBottom: !isContactList && "2px solid purple" }} onClick={() => setIsContactList(false)}>Grupo</label>
-
+                        <label style={{ cursor: "pointer", borderBottom: isContactList && "2px solid purple" }} onClick={() => {
+                            setSelectedContact(null);
+                           setIsContactList(true);
+                            setIsOpenGroup(false);
+                            setSelectedGroup(null);
+                            }}>Conversas</label>
+                        <label style={{ cursor: "pointer", borderBottom: !isContactList && "2px solid purple" }} onClick={() => {
+                            setSelectedContact(null);
+                            setIsContactList(false);
+                            setIsOpenGroup(true);
+                        }}>Grupo</label>
                     </div>
                     <hr />
+                    {/*Area dos contatos*/}
                     <div className='contact-list'>
                         {isContactList ? (<ul>
                             {contacts.map((contact, index) => {
@@ -376,6 +372,7 @@ const ChatRoom = () => {
                             </ul>
                         )}
                     </div>
+                    {/*Area do Usuarior Logado*/}
                     <div className='user'>
                         <hr />
                         <div style={{ "display": "flex" }}>
@@ -391,14 +388,15 @@ const ChatRoom = () => {
                     </div>
                 </div>
                 <div className="chat-content">
-                    {selectedContact !== null || selectedGroup !== null ?
+                    {(selectedContact !== null || selectedGroup !== null) &&
                         <><ul className="chat-messages" ref={scrollContainerRef} >
                             {publicChat.map((chat, index) => (
                                 <li className={`message ${chat.senderEmail === userData.email ? "self" : ""}`} key={index}>
                                     <div style={{ position: 'relative' }}>
-
-                                        <div className='message-content'>{/* Avatar do remetente */}
-                                            {!isContactList && chat.senderEmail !== userData.email && <div style={{ color: "blue", textAlign: "start", marginBottom: "8px" }}>{chat.senderEmail}</div>}
+                                        {/* Mensagens, se é de destinatario ou remetente */}
+                                        <div className='message-content' style={chat.senderEmail === userData.email ? {backgroundColor: "#90ebb0"} : {backgroundColor: "#90b9eb"}}>
+                                            {/* Identificação de destinatario em grupo */}
+                                            {!isContactList && chat.senderEmail !== userData.email && <div style={{ color: "rgb(68, 68, 68)", textAlign: "start", marginBottom: "8px" }}>{chat.senderEmail}</div>}
                                             <div style={{ display: 'flex', flexDirection: 'row' }}>
                                                 {chat.senderEmail !== userData.email && (
                                                     <div className="avatar">{chat.senderName}</div>
@@ -433,13 +431,14 @@ const ChatRoom = () => {
                                                     </>
                                                 )}
                                             </div>
-                                            <div style={{ display: 'flex', justifyContent: 'end' }}>{chat.timeSented}</div>
+                                            <div className={`message-time ${chat.senderEmail === userData.email ? "self" : ""}`}>{chat.timeSented}</div>
                                         </div>
                                     </div>
 
                                 </li>
                             ))}
                         </ul>
+                        {/*Selecionar imagem para envio e enviar mensagem */}
                             <div className="send-message" >
                                 {imagePreview && <div className='image-preview'><img src={imagePreview} width={30} height={30} alt="" /><span onClick={() => {
                                     setSelectedImage(null);
@@ -460,6 +459,7 @@ const ChatRoom = () => {
                                         placeholder="Digite uma mensagem..."
                                         value={userData.message}
                                         onChange={handleMessageChange}
+                                        onKeyDown={handleKeyDown}
                                     />
                                     <button className="send-button" onClick={() => {
                                         setUserData((prevState) => ({ ...prevState, message: '' }));
@@ -469,11 +469,19 @@ const ChatRoom = () => {
                                     </button>
                                 </div>
                             </div>
-                        </> :
+                        </> 
+                    }
+                    {(isOpenGroup === false && selectedContact === null && selectedGroup === null) &&
                         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: '100%', flexDirection: "column" }}>
                             <img src={LinkTalk}></img>
                             <p style={{ fontWeight: 'bolder', fontSize: "25px" }}>Vamos Conversar!!</p>
                             <span style={{ marginTop: "-20px" }}>Clique em uma conversa para iniciar</span>
+                        </div>}
+                    {(isOpenGroup === true && selectedContact === null &&  selectedGroup === null) &&
+                        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: '100%', flexDirection: "column" }}>
+                            <img src={LinkTalk}></img>
+                            <p style={{ fontWeight: 'bolder', fontSize: "25px" }}>Vamos Conversar!!</p>
+                            <span style={{ marginTop: "-20px" }}>Clique em um grupo para iniciar</span>
                         </div>}
                 </div>
 

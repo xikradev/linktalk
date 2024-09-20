@@ -25,7 +25,6 @@ const DeleteConversationModal = ({ setModalOpen, conversationId, refreshMessages
                     <button
                         onClick={() => {
                             setModalOpen(false);
-                            console.log(conversationId)
                             apiLinkTalk.delete(`/conversation/${conversationId}`).then(() => {
                                 refreshMessages();
                             })

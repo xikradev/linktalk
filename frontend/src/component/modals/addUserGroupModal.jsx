@@ -18,9 +18,6 @@ const AddUserGroupModal = ({ setOpenModal, contacts, addUser, groupId }) => {
         getExistedMembers();
     }, [])
 
-    useEffect(() => {
-        console.log(membersList);
-    })
 
     return (
         <div className="modal">
@@ -38,7 +35,6 @@ const AddUserGroupModal = ({ setOpenModal, contacts, addUser, groupId }) => {
                                             if (membersList.includes(contact.id)) {
                                                 setMemberslist(membersList.filter((item) => item !== contact.id))
                                             } else {
-                                                console.log(contact)
                                                 setMemberslist([...membersList, contact.id]);
                                             }
 

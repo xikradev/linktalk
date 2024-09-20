@@ -34,7 +34,6 @@ const RemoveUserGroups = ({ setOpenModal, removeUser, groupId, userId }) => {
                                         if (membersList.includes(contact.id)) {
                                             setMemberslist(membersList.filter((item) => item !== contact.id))
                                         } else {
-                                            console.log(contact)
                                             setMemberslist([...membersList, contact.id]);
                                         }
 
