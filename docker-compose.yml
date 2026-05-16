@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: meu_postgres_container
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: goat@123
+      POSTGRES_DB: linktalk
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
