@@ -96,84 +96,90 @@ O sistema destina-se a utilizadores com acesso à internet, familiarizados com i
 | **Administrador de grupo** | Utilizador autenticado com flag de administração em um grupo específico. |
 | **Sistema** | Registra auditoria e processa mensagens em tempo real. |
 
-### 2.2 Diagrama
+### 2.2 Casos de Uso Detalhados
+
+Abaixo estão descritos os 8 principais casos de uso do sistema, detalhados individualmente com os seus respetivos diagramas.
+
+#### UC01 - Registar-se
+- **Ator principal:** Visitante
+- **Descrição:** O visitante cria uma conta na aplicação com validação de dados e a sua senha é criptografada.
 
 ```mermaid
 flowchart LR
-    V["Visitante"]
-    U["Utilizador autenticado"]
-    A["Administrador de grupo"]
-    S["Sistema"]
-
-    A -.->|Herda de| U
-
-    subgraph LinkTalk
-        direction TB
-        UC01(["Registar-se"])
-        UC02(["Autenticar-se"])
-        UC03(["Verificar e-mail"])
-        UC04(["Buscar utilizador por e-mail"])
-        UC05(["Iniciar conversa privada"])
-        UC06(["Enviar mensagem (texto/imagem)"])
-        UC07(["Receber mensagem em tempo real"])
-        UC08(["Consultar histórico de mensagens"])
-        UC09(["Excluir mensagem"])
-        UC10(["Excluir conversa"])
-        UC11(["Listar contactos"])
-        UC12(["Criar grupo"])
-        UC13(["Listar grupos"])
-        UC20(["Listar membros do grupo"])
-        UC14(["Adicionar membro ao grupo"])
-        UC15(["Remover membro do grupo"])
-        UC16(["Renomear grupo"])
-        UC17(["Sair do grupo"])
-        UC18(["Excluir grupo"])
-        UC19(["Registar auditoria"])
-    end
-
-    V --> UC01
-    V --> UC02
-    V --> UC03
-
-    U --> UC02
-    U --> UC04
-    U --> UC05
-    U --> UC06
-    U --> UC07
-    U --> UC08
-    U --> UC09
-    U --> UC10
-    U --> UC11
-    U --> UC12
-    U --> UC13
-    U --> UC17
-    U --> UC20
-
-    A --> UC14
-    A --> UC15
-    A --> UC16
-    A --> UC18
-
-    UC06 -.->|include| UC07
-    UC06 -.->|include| UC19
-    UC12 -.->|include| UC19
-    UC02 -.->|include| UC19
-
-    S --> UC19
-    S --> UC07
+    V["Visitante"] --> UC01(["Registar-se"])
 ```
 
-### 2.3 Descrição resumida dos casos de uso
+#### UC02 - Autenticar-se
+- **Ator principal:** Visitante / Utilizador autenticado
+- **Descrição:** O sistema valida as credenciais do utilizador e retorna um token JWT para acesso.
+- **Relacionamentos:** Aciona automaticamente o registo de auditoria (UC08).
 
-| Caso de uso | Ator principal | Descrição |
-|-------------|------------------|-----------|
-| Registar-se | Visitante | Cria conta com validação de dados e senha criptografada. |
-| Autenticar-se | Visitante / Utilizador | Valida credenciais e retorna token JWT. |
-| Enviar mensagem | Utilizador autenticado | Envia texto ou imagem via WebSocket; persiste no banco. |
-| Criar grupo | Utilizador autenticado | Cria grupo, adiciona membros e define criador como admin. |
-| Adicionar membro ao grupo | Administrador de grupo | Inclui novos utilizadores no grupo. |
-| Excluir grupo | Administrador de grupo | Remove grupo e dados associados (cascade). |
-| Registar auditoria | Sistema | Grava ação, utilizador e data/hora em `audit_log`. |
+```mermaid
+flowchart LR
+    V["Visitante"] --> UC02(["Autenticar-se"])
+    U["Utilizador autenticado"] --> UC02
+    UC02 -.->|include| UC08(["Registar auditoria"])
+```
+
+#### UC03 - Iniciar conversa privada
+- **Ator principal:** Utilizador autenticado
+- **Descrição:** Um utilizador inicia uma nova conversa (chat 1:1) com outro utilizador do sistema.
+
+```mermaid
+flowchart LR
+    U["Utilizador autenticado"] --> UC03(["Iniciar conversa privada"])
+```
+
+#### UC04 - Enviar mensagem (texto/imagem)
+- **Ator principal:** Utilizador autenticado
+- **Descrição:** O utilizador envia uma mensagem de texto ou uma imagem via WebSocket numa conversa privada ou de grupo.
+- **Relacionamentos:** Inclui receber a mensagem em tempo real (UC05) e registar a auditoria (UC08).
+
+```mermaid
+flowchart LR
+    U["Utilizador autenticado"] --> UC04(["Enviar mensagem (texto/imagem)"])
+    UC04 -.->|include| UC05(["Receber mensagem em tempo real"])
+    UC04 -.->|include| UC08(["Registar auditoria"])
+```
+
+#### UC05 - Receber mensagem em tempo real
+- **Atores:** Sistema, Utilizador autenticado
+- **Descrição:** O sistema encarrega-se de entregar a mensagem instantaneamente aos destinatários conectados utilizando WebSockets.
+
+```mermaid
+flowchart LR
+    S["Sistema"] --> UC05(["Receber mensagem em tempo real"])
+    UC05 --> U["Utilizador autenticado"]
+```
+
+#### UC06 - Criar grupo
+- **Ator principal:** Utilizador autenticado
+- **Descrição:** O utilizador cria um novo grupo de chat, adiciona os membros iniciais e é definido automaticamente como o administrador do grupo.
+- **Relacionamentos:** Aciona automaticamente o registo de auditoria (UC08).
+
+```mermaid
+flowchart LR
+    U["Utilizador autenticado"] --> UC06(["Criar grupo"])
+    UC06 -.->|include| UC08(["Registar auditoria"])
+```
+
+#### UC07 - Excluir grupo
+- **Ator principal:** Administrador de grupo
+- **Descrição:** O administrador remove o grupo permanentemente do sistema, excluindo também todos os dados associados (operação em cascade).
+
+```mermaid
+flowchart LR
+    A["Administrador de grupo"] --> UC07(["Excluir grupo"])
+```
+
+#### UC08 - Registar auditoria
+- **Ator principal:** Sistema
+- **Descrição:** Funcionalidade interna que grava de forma transparente qualquer ação relevante, identificando o utilizador que a realizou e a data/hora exata, armazenando na tabela `audit_log`.
+
+```mermaid
+flowchart LR
+    S["Sistema"] --> UC08(["Registar auditoria"])
+```
 
 ---
 
