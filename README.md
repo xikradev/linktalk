@@ -1,5 +1,7 @@
 # 💬 LinkTalk
 
+> **Documentação acadêmica (Qualidade de Software):** [docs/Documento-de-Requisitos.md](docs/Documento-de-Requisitos.md) — requisitos, casos de uso, classes, DER e dicionário de dados.
+
 ## 1. Sobre o Projeto
 
 **LinkTalk** é uma aplicação de chat em tempo real que permite aos usuários trocarem mensagens privadas e em grupos. O sistema suporta envio de texto e imagens, gerenciamento de grupos de conversa (criação, renomeação, adição e remoção de membros), e controle de acesso baseado em papéis (administradores de grupo).
@@ -34,8 +36,8 @@ A aplicação foi construída com foco em comunicação em tempo real via **WebS
 O banco de dados roda em um container Docker. O arquivo `init.sql` na raiz do projeto é executado automaticamente na primeira inicialização, criando todas as tabelas e sequences necessárias.
 
 ```bash
-# Na raiz do projeto
-sudo docker compose up -d
+# Na raiz do projeto (Windows: omita sudo)
+docker compose up -d
 ```
 
 Isso irá subir um container PostgreSQL 15 com as seguintes configurações:
@@ -51,7 +53,7 @@ Isso irá subir um container PostgreSQL 15 com as seguintes configurações:
 Para parar o banco:
 
 ```bash
-sudo docker compose down
+docker compose down
 ```
 
 ---
@@ -63,11 +65,9 @@ O backend é uma aplicação **Quarkus** gerenciada pelo Maven Wrapper. Certifiq
 ```bash
 cd backend
 
-# Dar permissão de execução ao script (apenas na primeira vez)
-chmod +x mvnw
-
-# Iniciar o servidor em modo desenvolvimento (hot reload)
-./mvnw quarkus:dev
+# Linux/macOS: chmod +x mvnw && ./mvnw quarkus:dev
+# Windows:
+mvnw.cmd quarkus:dev
 ```
 
 O servidor iniciará em: **`http://localhost:8081`**
@@ -97,9 +97,9 @@ O frontend estará disponível em: **`http://localhost:5173`**
 ### Ordem recomendada para subir o ambiente
 
 ```
-1. sudo docker compose up -d      ← Banco de dados
-2. cd backend && ./mvnw quarkus:dev ← Backend (porta 8081)
-3. cd frontend && npm run dev       ← Frontend (porta 5173)
+1. docker compose up -d              ← Banco de dados
+2. cd backend && mvnw.cmd quarkus:dev ← Backend (porta 8081; Linux: ./mvnw)
+3. cd frontend && npm run dev         ← Frontend (porta 5173)
 ```
 
 ---
