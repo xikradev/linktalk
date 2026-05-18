@@ -99,38 +99,37 @@ O sistema destina-se a utilizadores com acesso à internet, familiarizados com i
 ### 2.2 Diagrama
 
 ```mermaid
-useCaseDiagram
-    left to right direction
+flowchart LR
+    V["Visitante"]
+    U["Utilizador autenticado"]
+    A["Administrador de grupo"]
+    S["Sistema"]
 
-    actor Visitante as V
-    actor "Utilizador autenticado" as U
-    actor "Administrador de grupo" as A
-    actor Sistema as S
+    A -.->|Herda de| U
 
-    A --|> U
-
-    rectangle "LinkTalk" {
-        usecase "Registar-se" as UC01
-        usecase "Autenticar-se" as UC02
-        usecase "Verificar e-mail" as UC03
-        usecase "Buscar utilizador por e-mail" as UC04
-        usecase "Iniciar conversa privada" as UC05
-        usecase "Enviar mensagem (texto/imagem)" as UC06
-        usecase "Receber mensagem em tempo real" as UC07
-        usecase "Consultar histórico de mensagens" as UC08
-        usecase "Excluir mensagem" as UC09
-        usecase "Excluir conversa" as UC10
-        usecase "Listar contactos" as UC11
-        usecase "Criar grupo" as UC12
-        usecase "Listar grupos" as UC13
-        usecase "Listar membros do grupo" as UC20
-        usecase "Adicionar membro ao grupo" as UC14
-        usecase "Remover membro do grupo" as UC15
-        usecase "Renomear grupo" as UC16
-        usecase "Sair do grupo" as UC17
-        usecase "Excluir grupo" as UC18
-        usecase "Registar auditoria" as UC19
-    }
+    subgraph LinkTalk
+        direction TB
+        UC01(["Registar-se"])
+        UC02(["Autenticar-se"])
+        UC03(["Verificar e-mail"])
+        UC04(["Buscar utilizador por e-mail"])
+        UC05(["Iniciar conversa privada"])
+        UC06(["Enviar mensagem (texto/imagem)"])
+        UC07(["Receber mensagem em tempo real"])
+        UC08(["Consultar histórico de mensagens"])
+        UC09(["Excluir mensagem"])
+        UC10(["Excluir conversa"])
+        UC11(["Listar contactos"])
+        UC12(["Criar grupo"])
+        UC13(["Listar grupos"])
+        UC20(["Listar membros do grupo"])
+        UC14(["Adicionar membro ao grupo"])
+        UC15(["Remover membro do grupo"])
+        UC16(["Renomear grupo"])
+        UC17(["Sair do grupo"])
+        UC18(["Excluir grupo"])
+        UC19(["Registar auditoria"])
+    end
 
     V --> UC01
     V --> UC02
@@ -155,10 +154,10 @@ useCaseDiagram
     A --> UC16
     A --> UC18
 
-    UC06 ..> UC07 : include
-    UC06 ..> UC19 : include
-    UC12 ..> UC19 : include
-    UC02 ..> UC19 : include
+    UC06 -.->|include| UC07
+    UC06 -.->|include| UC19
+    UC12 -.->|include| UC19
+    UC02 -.->|include| UC19
 
     S --> UC19
     S --> UC07
