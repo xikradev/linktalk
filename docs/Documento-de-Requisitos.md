@@ -254,7 +254,7 @@ classDiagram
     Group "1" --> "0..*" Message : contém
     Group "1" --> "0..*" GroupAdmin : possui
     User "1" --> "0..*" GroupAdmin : administra
-    Group "1" o-- "0..*" User : membros (N:M)
+    Group "1" o-- "0..*" User : membros
     Message "1" --> "0..1" Image : possui
 ```
 
